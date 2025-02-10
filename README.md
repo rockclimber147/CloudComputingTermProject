@@ -1,11 +1,15 @@
-# Game Project
+# Cloud Computing Term Project
 
 ## Overview
 This project is a real-time game platform where users can create accounts, form game lobbies, and invite other users to play games. The platform uses WebSockets for real-time communication and Redis for game state management.
 
----
+## Authors
 
-## example heading
+- [Daylen Smith](https://github.com/rockclimber147)
+- [Pouyan Norouzi](https://github.com/PouyanNorouzi)
+- [Tommy Phuong](https://github.com/TommyPhuongg)
+
+---
 
 ### Frontend
 ```
