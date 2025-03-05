@@ -10,10 +10,22 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
         res.status(200).json(users);
     } catch (error: unknown) {
         if (error instanceof Error) {
-            // TypeScript knows 'error' is an instance of Error here
             res.status(500).json({ error: error.message });
         } else {
-            // In case the error is not of type 'Error'
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
+});
+
+router.get("/friends", async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { userID } = req.body;
+        const friends = await userRepository.getFriendsForUser(userID);
+        res.status(200).json(friends);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            res.status(500).json({ error: error.message });
+        } else {
             res.status(500).json({ error: 'Unknown error occurred' });
         }
     }

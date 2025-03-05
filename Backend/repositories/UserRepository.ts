@@ -2,10 +2,6 @@ import { DbContext } from '../config/DbStartup.js';
 import { UserFriendStatusEnum } from '../models/UserFriend.js';
 import bcrypt from 'bcryptjs'
 
-interface UserLogic {
-
-}
-
 class UserRepository {
     SALT_ROUNDS = 10;
     MIN_PASSWORD_LENGTH = 6;
@@ -55,6 +51,32 @@ class UserRepository {
         userFriend.status = UserFriendStatusEnum.Accepted;
         await userFriend.save();
         return userFriend;
+    }
+
+    async getFriendsForUser(userID: number) {
+        const [fromUserFriends, toUserFriends] = await Promise.all([
+            this.context.UserFriend.findAll({
+                where: {
+                    senderID: userID,
+                    status: UserFriendStatusEnum.Accepted
+                }
+            }),
+            this.context.UserFriend.findAll({
+                where: {
+                    receiverID: userID,
+                    status: UserFriendStatusEnum.Accepted
+                }
+            })
+        ]);
+
+        return fromUserFriends
+    .concat(toUserFriends)
+    .sort((a, b) => {
+        const aDate = a.dateAccepted ?? new Date(0);
+        const bDate = b.dateAccepted ?? new Date(0);
+
+        return aDate.getTime() - bDate.getTime(); // Compare as timestamps
+    });
     }
 }
 

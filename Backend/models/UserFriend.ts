@@ -12,6 +12,7 @@ interface UserFriendAttributes {
   receiverID: number;
   dateCreated: Date;
   status: UserFriendStatusEnum.Pending | UserFriendStatusEnum.Accepted | UserFriendStatusEnum.Rejected;
+  dateAccepted?: Date;
 }
 
 interface UserFriendCreationAttributes extends Optional<UserFriendAttributes, 'dateCreated'> {}
@@ -21,7 +22,8 @@ class UserFriend extends Model<UserFriendAttributes, UserFriendCreationAttribute
   public receiverID!: number;
   public dateCreated!: Date;
   public status!: UserFriendStatusEnum.Pending | UserFriendStatusEnum.Accepted | UserFriendStatusEnum.Rejected;
-
+  dateAccepted?: Date;
+  
   // Timestamps
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -57,12 +59,26 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
         allowNull: false,
         defaultValue: UserFriendStatusEnum.Pending,
       },
+      dateAccepted: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,  // Allow null until the friend request is accepted
+      },
     },
     {
       sequelize,
       modelName: 'UserFriend',
     }
   );
+
+
+  UserFriend.afterUpdate(async (instance) => {
+    if (instance.status === UserFriendStatusEnum.Accepted && !instance.dateAccepted) {
+      instance.dateAccepted = new Date(); // Set the current date and time when the status is changed to Accepted
+      await instance.save(); // Save the instance to update the dateAccepted field
+    }
+  });
+
   return UserFriend;
 };
 
