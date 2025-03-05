@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { GameResultsRepository } from '../repositories/GameResultsRepository.js';
+import { gameResultsRepository } from '../config/RepositoryInit.js';
 import { handleError } from '../modules/ErrorHandling.js';
 
 

@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { UserNotificationRepository } from '../repositories/UserNotificationRepository.js'
+import { userNotificationRepository } from '../config/RepositoryInit.js';
 import { handleError } from '../modules/ErrorHandling.js';
 
 

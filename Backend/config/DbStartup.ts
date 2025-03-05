@@ -14,7 +14,7 @@ const sequelize = new Sequelize(databaseUrl, {
   logging: false,
 });
 
-async function testConnection(): Promise<void> {
+async function connectToSQLDB(): Promise<void> {
   try {
     await sequelize.authenticate();
     console.log("Connected to Neon database successfully!");
@@ -22,8 +22,6 @@ async function testConnection(): Promise<void> {
     console.error("Neon DB connection failed:", error);
   }
 }
-
-testConnection();
 
 import { initializeUserModel } from "../models/User.js";
 import { initializeUserFriendModel } from "../models/UserFriend.js";
@@ -59,6 +57,7 @@ class DbContext {
 const context: DbContext = new DbContext();
 
 export { 
+    connectToSQLDB,
     sequelize,
     User,
     UserFriend,

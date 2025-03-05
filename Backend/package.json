@@ -16,13 +16,16 @@
     "dependencies": {
         "@types/bcryptjs": "^2.4.6",
         "bcrypt": "^5.1.1",
+        "bcryptjs": "^3.0.2",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "pg": "^8.13.3",
+        "redis": "^4.7.0",
         "sequelize": "^6.37.6"
     },
     "devDependencies": {
         "@types/express": "^5.0.0",
+        "@types/redis": "^4.0.10",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2"
     }
