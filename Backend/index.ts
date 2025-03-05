@@ -1,12 +1,14 @@
 import express from 'express';
 import { bruh } from './modules/test_module.js';
+import userRoutes from './routes/UserRoutes.js'
 
 const app = express();
 
-app.get('/', (req, res) => {
-    console.log(bruh);
+app.use('/api', userRoutes)
 
-    res.send('Hello World');
+app.get('/', async (req, res) => {
+    console.log(bruh);
+    res.send("Hello World");
 });
 
 app.listen(3000, () => {
