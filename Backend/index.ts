@@ -4,7 +4,7 @@ import userRoutes from './routes/UserRoutes.js'
 
 const app = express();
 
-app.use('/api', userRoutes)
+app.use('/api/users', userRoutes)
 
 app.get('/', async (req, res) => {
     console.log(bruh);
