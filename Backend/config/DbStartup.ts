@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { Sequelize } from "sequelize";
 
-// Ensure that the environment variable is defined (with a fallback if needed)
 const databaseUrl: string = process.env.DATABASE_URL || "";
 
 const sequelize = new Sequelize(databaseUrl, {
@@ -41,11 +40,31 @@ const GameResults = initializeGameResultsModel(sequelize, User);
 const GameResultsUser = initializeGameResultsUserModel(sequelize, User);
 
 
+class DbContext {
+    public User: typeof User;
+    public UserFriend: typeof UserFriend;
+    public UserNotification: typeof UserNotification;
+    public GameResults: typeof GameResults;
+    public GameResultsUser: typeof GameResultsUser;
+  
+    constructor() {
+      this.User = User;
+      this.UserFriend = UserFriend;
+      this.UserNotification = UserNotification;
+      this.GameResults = GameResults;
+      this.GameResultsUser = GameResultsUser;
+    }
+}
+
+const context: DbContext = new DbContext();
+
 export { 
     sequelize,
     User,
     UserFriend,
     UserNotification,
     GameResults,
-    GameResultsUser
+    GameResultsUser,
+    DbContext,
+    context
  };

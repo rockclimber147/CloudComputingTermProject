@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
-import { User, GameResults } from '../config/db.js'; 
+import { User, GameResults } from '../config/DbStartup.js'; 
 
 interface GameResultsUserAttributes {
   userID: number;

@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
-import { User } from '../config/db.js'; 
+import { User } from '../config/DbStartup.js'; 
 
 interface UserFriendAttributes {
   senderID: number;
