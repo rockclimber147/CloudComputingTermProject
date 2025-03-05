@@ -27,7 +27,7 @@ export const initializeGameResultsModel = (sequelize: Sequelize, UserModel: type
     GameResults.init(
     {
         id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         },

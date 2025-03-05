@@ -27,7 +27,7 @@ export const initializeUserModel = (sequelize: Sequelize): typeof User => {
   User.init(
     {
       id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
