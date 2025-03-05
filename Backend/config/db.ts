@@ -26,6 +26,12 @@ async function testConnection(): Promise<void> {
 
 testConnection();
 
+const User = require("../models/User.js")(sequelize);
+const UserFriend = require("../models/UserFriend.js")(sequelize, User);
+const UserNotification = require("../models/UserNotification.js")(sequelize, User);
+const GameResults = require("../models/GameResults.js")(sequelize, User);
+const GameResultsUser = require("../models/GameResultsUser.js")(sequelize, User);
+
 export { 
     sequelize
 }
