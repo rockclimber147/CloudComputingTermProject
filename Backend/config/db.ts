@@ -25,3 +25,7 @@ async function testConnection(): Promise<void> {
 }
 
 testConnection();
+
+export { 
+    sequelize
+}
