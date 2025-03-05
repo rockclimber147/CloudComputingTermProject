@@ -1,6 +1,6 @@
-import { Model, DataTypes, Optional } from 'sequelize';
-import { sequelize } from '../config/db.js';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
+// Define the attributes of the User model
 interface UserAttributes {
   id: number;
   username: string;
@@ -10,6 +10,7 @@ interface UserAttributes {
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 
+// User model definition
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
   public username!: string;
@@ -21,32 +22,34 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public readonly updatedAt!: Date;
 }
 
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      primaryKey: true,
-      autoIncrement: true,
+// Function to initialize the User model with sequelize
+export const initializeUserModel = (sequelize: Sequelize): typeof User => {
+  User.init(
+    {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
     },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'User',
-  }
-);
-
-export default User;
+    {
+      sequelize,
+      modelName: 'User',
+    }
+  );
+  return User;
+};

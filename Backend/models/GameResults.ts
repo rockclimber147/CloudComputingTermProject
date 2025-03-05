@@ -1,6 +1,5 @@
-import { Model, DataTypes, Optional } from 'sequelize';
-import { sequelize } from '../config/db.js';
-import User from './User.js';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
+import { User } from '../config/db.js'; 
 
 interface GameResultsAttributes {
   id: number;
@@ -24,38 +23,40 @@ class GameResults extends Model<GameResultsAttributes, GameResultsCreationAttrib
   public readonly updatedAt!: Date;
 }
 
-GameResults.init(
-  {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      primaryKey: true,
-      autoIncrement: true,
+export const initializeGameResultsModel = (sequelize: Sequelize, UserModel: typeof User): typeof GameResults => {
+    GameResults.init(
+    {
+        id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+        },
+        gameName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        },
+        winnerID: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: User,
+            key: 'id',
+        },
+        },
+        startTime: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        },
+        endTime: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        },
     },
-    gameName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    winnerID: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
-    },
-    startTime: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    endTime: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'GameResults',
-  }
-);
+    {
+        sequelize,
+        modelName: 'GameResults',
+    }
+    );
+    return GameResults;
+};
 
-export default GameResults;

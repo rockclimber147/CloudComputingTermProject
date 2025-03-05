@@ -1,7 +1,5 @@
-import { Model, DataTypes, Optional } from 'sequelize';
-import { sequelize } from '../config/db.js';
-import User from './User.js';
-import GameResults from './GameResults.js';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
+import { User, GameResults } from '../config/db.js'; 
 
 interface GameResultsUserAttributes {
   userID: number;
@@ -19,29 +17,30 @@ class GameResultsUser extends Model<GameResultsUserAttributes, GameResultsUserCr
   public readonly updatedAt!: Date;
 }
 
-GameResultsUser.init(
-  {
-    userID: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
+export const initializeGameResultsUserModel = (sequelize: Sequelize, UserModel: typeof User): typeof GameResultsUser => {
+    GameResultsUser.init(
+    {
+        userID: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: User,
+            key: 'id',
+        },
+        },
+        gameID: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: GameResults,
+            key: 'id',
+        },
+        },
     },
-    gameID: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: GameResults,
-        key: 'id',
-      },
-    },
-  },
-  {
-    sequelize,
-    modelName: 'GameResultsUser',
-  }
-);
-
-export default GameResultsUser;
+    {
+        sequelize,
+        modelName: 'GameResultsUser',
+    }
+    );
+    return GameResultsUser;
+};

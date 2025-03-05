@@ -1,6 +1,5 @@
-import { Model, DataTypes, Optional } from 'sequelize';
-import { sequelize } from '../config/db.js';
-import User from './User.js';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
+import { User } from '../config/db.js'; 
 
 interface UserNotificationAttributes {
   userID: number;
@@ -24,42 +23,43 @@ class UserNotification extends Model<UserNotificationAttributes, UserNotificatio
   public readonly updatedAt!: Date;
 }
 
-UserNotification.init(
-  {
-    userID: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
+export const initializeUserNotificationModel = (sequelize: Sequelize, UserModel: typeof User): typeof UserNotification => {
+    UserNotification.init(
+    {
+        userID: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: User,
+            key: 'id',
+        },
+        },
+        message: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        },
+        time: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        },
+        seen: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        },
+        sentBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: User,
+            key: 'id',
+        },
+        },
     },
-    message: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    time: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    seen: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    sentBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: User,
-        key: 'id',
-      },
-    },
-  },
-  {
-    sequelize,
-    modelName: 'UserNotification',
-  }
-);
-
-export default UserNotification;
+    {
+        sequelize,
+        modelName: 'UserNotification',
+    }
+    );
+    return UserNotification;
+};
