@@ -1,5 +1,6 @@
 import { DbContext } from '../config/DbStartup.js'; 
 import { UserFriendStatusEnum } from '../models/UserFriend.js';
+import { ErrorWithStatusCode } from '../modules/ErrorHandling.js';
 import bcrypt from 'bcryptjs'
 
 class UserRepository {
@@ -18,7 +19,7 @@ class UserRepository {
 
     async createUser(username: string, email: string, password: string) {
         if (!password || password.length < this.MIN_PASSWORD_LENGTH) {
-            throw new Error(`Password must be at least ${this.MIN_PASSWORD_LENGTH} characters long`);
+            throw new ErrorWithStatusCode(`Password must be at least ${this.MIN_PASSWORD_LENGTH} characters long`, 500);
         }
         let hashedPassword: string = await bcrypt.hash(password, this.SALT_ROUNDS);
         return await this.context.User.create({ 
@@ -46,7 +47,7 @@ class UserRepository {
         });
     
         if (!userFriend) {
-            throw new Error('Friend request not found or already accepted/rejected.');
+            throw new ErrorWithStatusCode('Friend request not found or already accepted/rejected.', 404);
         }
         userFriend.status = UserFriendStatusEnum.Accepted;
         await userFriend.save();
@@ -75,7 +76,7 @@ class UserRepository {
         const aDate = a.dateAccepted ?? new Date(0);
         const bDate = b.dateAccepted ?? new Date(0);
 
-        return aDate.getTime() - bDate.getTime(); // Compare as timestamps
+        return aDate.getTime() - bDate.getTime();
     });
     }
 }

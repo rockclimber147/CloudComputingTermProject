@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { userRepository } from "../config/RepositoryInit.js";
+import { handleError } from '../modules/ErrorHandling.js';
 
 
 const router = express.Router();
@@ -9,11 +10,7 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
         const users = await userRepository.getAllUsers(); // Fetch all users
         res.status(200).json(users);
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Unknown error occurred' });
-        }
+        handleError(res, error)
     }
 });
 
@@ -23,11 +20,7 @@ router.get("/friends", async (req: Request, res: Response): Promise<void> => {
         const friends = await userRepository.getFriendsForUser(userID);
         res.status(200).json(friends);
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Unknown error occurred' });
-        }
+        handleError(res, error)
     }
 });
 
@@ -44,11 +37,7 @@ router.post('/send-friend-request', async (req: Request, res: Response): Promise
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Unknown error occurred' });
-        }
+        handleError(res, error)
     }
 });
 
@@ -65,11 +54,7 @@ router.post('/accept-friend-request', async (req: Request, res: Response): Promi
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Unknown error occurred' });
-        }
+        handleError(res, error)
     }
 });
 
