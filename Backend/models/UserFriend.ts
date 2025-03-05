@@ -1,11 +1,17 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 import { User } from '../config/DbStartup.js'; 
 
+enum UserFriendStatusEnum {
+    Pending = "Pending",
+    Accepted = "Accepted",
+    Rejected = "Rejected"
+}
+
 interface UserFriendAttributes {
   senderID: number;
   receiverID: number;
   dateCreated: Date;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  status: UserFriendStatusEnum.Pending | UserFriendStatusEnum.Accepted | UserFriendStatusEnum.Rejected;
 }
 
 interface UserFriendCreationAttributes extends Optional<UserFriendAttributes, 'dateCreated'> {}
@@ -14,7 +20,7 @@ class UserFriend extends Model<UserFriendAttributes, UserFriendCreationAttribute
   public senderID!: number;
   public receiverID!: number;
   public dateCreated!: Date;
-  public status!: 'Pending' | 'Accepted' | 'Rejected';
+  public status!: UserFriendStatusEnum.Pending | UserFriendStatusEnum.Accepted | UserFriendStatusEnum.Rejected;
 
   // Timestamps
   public readonly createdAt!: Date;
@@ -29,7 +35,7 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: UserModel,  // Reference to the User model
+          model: UserModel,
           key: 'id',
         },
       },
@@ -37,7 +43,7 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: UserModel,  // Reference to the User model
+          model: UserModel,
           key: 'id',
         },
       },
@@ -47,8 +53,9 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
         defaultValue: DataTypes.NOW,
       },
       status: {
-        type: DataTypes.ENUM('Pending', 'Accepted', 'Rejected'),
+        type: DataTypes.ENUM(UserFriendStatusEnum.Pending, UserFriendStatusEnum.Accepted, UserFriendStatusEnum.Rejected),
         allowNull: false,
+        defaultValue: UserFriendStatusEnum.Pending,
       },
     },
     {
@@ -58,3 +65,5 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
   );
   return UserFriend;
 };
+
+export { UserFriendStatusEnum }
