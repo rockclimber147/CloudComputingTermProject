@@ -70,17 +70,44 @@ Make sure you have the following installed on your machine:
 
 ```
 /backend
-     ├── /node_modules    # Node.js dependencies (ignored in Git)
-     ├── /src             # Source files
-     │   ├── /modules     # Modules
-     │   ├── index.ts     # Main entry point of the server
-     ├── .env             # Local environment variables (not tracked in Git)
-     ├── .gitignore       # Git ignore rules for sensitive files
-     ├── nodemon.json     # Nodemon configuration
-     ├── package.json     # Backend dependencies
-     ├── package-lock.json # Dependency lock file
-     ├── tsconfig.json    # TypeScript configuration
-     ├── .prettierrc.json # Prettier configuration
+├── .env                                # Environment Variables (not tracked in Git)
+├── .gitignore                          # Git ignore rules for sensitive files
+├── .prettierrc.json                    # Prettier configuration for code formatting
+├── index.ts                            # Main entry point of the application
+├── nodemon.json                        # Configuration for nodemon (automatic server restarts)
+├── package-lock.json                   # Dependency lock file (generated automatically)
+├── package.json                        # Project metadata and dependencies
+├── README.md                           # Project documentation (this file)
+├── structure.txt                       # Directory structure or additional project info
+├── tsconfig.json                       # TypeScript configuration file
+|
+├---config
+|   ├── DbStartup.ts                       # Database initialization and connection setup
+|   ├── RepositoryInit.ts                  # Repository pattern initialization (data access layer)
+|
+├---dist
+|   # Compiled JavaScript files after TypeScript compilation
+|
+├---models
+|   ├── GameResults.ts                     # Model for game results (user performance in games)
+|   ├── GameResultsUser.ts                 # Model for game results linked to users
+|   ├── User.ts                            # User model for user data (authentication and profiles)
+|   ├── UserFriend.ts                      # Model for friend relationships between users
+|   ├── UserNotification.ts                # Model for user notifications (alerts and messages)
+|
+├---modules
+|   ├── ErrorHandling.ts                   # Custom error handling utilities
+|   ├── test_module.ts                     # testing
+|
+├---repositories
+|   ├── GameResultsRepository.ts           # Logic for handling game results
+|   ├── UserNotificationRepository.ts      # Logic for handling user notifications
+|   ├── UserRepository.ts                  # Logic for handling user data 
+|
+├---routes
+|   ├── GameResultsRoutes.ts               # API routes for game results
+|   ├── UserNotificationRoutes.ts          # API routes for user notifications
+|   ├── UserRoutes.ts                      # API routes for user management
 ```
 
 ## Contributing
