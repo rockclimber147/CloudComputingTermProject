@@ -3,7 +3,7 @@ import { bruh } from './modules/test_module.js';
 import userRoutes from './routes/UserRoutes.js'
 import userNotificationRoutes from './routes/UserNotificationRoutes.js'
 import gameResultsRoutes from './routes/GameResultsRoutes.js'
-import startApp from './config/Startup.js';
+import startApp from './config/AppStartup.js';
 
 const app = express();
 
