@@ -15,7 +15,7 @@ class UserRepository {
     }
 
     async getAllUsers() {
-        return await this.context.User.findAll();
+        return (await this.context.User.findAll()).map(user => new UserBasicInfo(user));
     }
 
     async createUser(username: string, email: string, password: string) {
