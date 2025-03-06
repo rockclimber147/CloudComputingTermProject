@@ -14,16 +14,6 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
     }
 });
 
-router.get("/login", async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { username, password } = req.body;
-        const user = await userRepository.loginUser(username, password);
-        res.status(200).json(user);
-    } catch (error: unknown) {
-        handleError(res, error)
-    }
-});
-
 
 router.get("/friends", async (req: Request, res: Response): Promise<void> => {
     try {

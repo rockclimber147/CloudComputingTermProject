@@ -23,11 +23,13 @@ class UserRepository {
             throw new ErrorWithStatusCode(`Password must be at least ${this.MIN_PASSWORD_LENGTH} characters long`, 500);
         }
         let hashedPassword: string = await bcrypt.hash(password, this.SALT_ROUNDS);
-        return await this.context.User.create({ 
+        let user =  await this.context.User.create({ 
             username: username, 
             email: email, 
             password: hashedPassword
          });
+
+         return new UserBasicInfo(user);
     }
 
     async loginUser(userName: string, password: string) {
