@@ -102,9 +102,7 @@ class RedisService {
 const redis: RedisService = new RedisService(process.env.REDIS_URL || 'redis://localhost:6379');
 
 async function connectToRedis(): Promise<void> {
-    if (redis.isConnected()) {
-      console.log('Redis is already connected!');
-    } else {
+    if (!redis.isConnected()) {
       try {
         // Wait for Redis to be ready
         await new Promise<void>((resolve, reject) => {
