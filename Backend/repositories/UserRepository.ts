@@ -28,9 +28,9 @@ class UserRepository {
             username: username, 
             email: email, 
             password: hashedPassword
-         });
+        });
 
-         return new UserBasicInfo(user);
+        return new UserBasicInfo(user);
     }
 
     async loginUser(userName: string, password: string) {
@@ -104,15 +104,16 @@ class UserRepository {
 
     async getFriendsForUser(userID: number) {
 
-        const sentRequests = await this.context.UserFriend.findAll({
-            where: { senderID: userID },
-            attributes: ['receiverID', 'status', 'dateCreated', 'dateAccepted']
-        });
-
-        const receivedRequests = await this.context.UserFriend.findAll({
-            where: { receiverID: userID },
-            attributes: ['senderID', 'status', 'dateCreated', 'dateAccepted']
-        });
+        const [sentRequests, receivedRequests] = await Promise.all([
+            this.context.UserFriend.findAll({
+                where: { senderID: userID },
+                attributes: ['receiverID', 'status', 'dateCreated', 'dateAccepted']
+            }),
+            this.context.UserFriend.findAll({
+                where: { receiverID: userID },
+                attributes: ['senderID', 'status', 'dateCreated', 'dateAccepted']
+            })
+        ]);
 
 
         const friendIDs = [
