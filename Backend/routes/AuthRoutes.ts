@@ -25,4 +25,14 @@ router.post("/create", async (req: Request, res: Response): Promise<void> => {
     }
 });
 
+router.post("/logout", async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { userID } = req.body
+        const user = await userRepository.logoutUser(userID);
+        res.status(200).json(user);
+    } catch (error: unknown) {
+        handleError(res, error)
+    }
+});
+
 export default router;

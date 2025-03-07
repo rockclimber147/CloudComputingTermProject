@@ -59,6 +59,10 @@ class UserRepository {
 
     }
 
+    async logoutUser(userID: number) {
+        return await this.context.User.findByPk(userID);
+    }
+
     async sendFriendRequest(senderId: number, receiverId: number) {
         if (senderId === receiverId) {
             throw new ErrorWithStatusCode('Cannot send friend request to yourself.', 400);
