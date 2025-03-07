@@ -1,4 +1,5 @@
 import { DbContext } from '../config/DbStartup.js'; 
+import { UserBasicInfo } from '../models/User.js';
 import { UserFriendStatusEnum } from '../models/UserFriend.js';
 import { ErrorWithStatusCode } from '../modules/ErrorHandling.js';
 import bcrypt from 'bcryptjs'
@@ -14,7 +15,7 @@ class UserRepository {
     }
 
     async getAllUsers() {
-        return await this.context.User.findAll();
+        return (await this.context.User.findAll()).map(user => new UserBasicInfo(user));
     }
 
     async createUser(username: string, email: string, password: string) {
@@ -22,11 +23,39 @@ class UserRepository {
             throw new ErrorWithStatusCode(`Password must be at least ${this.MIN_PASSWORD_LENGTH} characters long`, 500);
         }
         let hashedPassword: string = await bcrypt.hash(password, this.SALT_ROUNDS);
-        return await this.context.User.create({ 
+        let user =  await this.context.User.create({ 
             username: username, 
             email: email, 
             password: hashedPassword
          });
+
+         return new UserBasicInfo(user);
+    }
+
+    async loginUser(userName: string, password: string) {
+        if (!userName || !password) {
+            throw new ErrorWithStatusCode(`Login requires username and password!`, 500)
+        }
+        let user = await this.context.User.findOne({
+            where: {
+                username: userName
+            }
+        });
+
+        if (!user) {
+            throw new ErrorWithStatusCode(`User with username ${userName} not found!`, 404)
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordCorrect) {
+            throw new ErrorWithStatusCode(`Incorrect password`, 500);
+        }
+
+        const userBasicInfo = new UserBasicInfo(user);
+
+        return userBasicInfo;
+
     }
 
     async sendFriendRequest(senderId: number, receiverId: number) {
