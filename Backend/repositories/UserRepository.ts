@@ -1,6 +1,7 @@
+import { Sequelize, Op } from 'sequelize';
 import { DbContext } from '../config/DbStartup.js'; 
 import { UserBasicInfo } from '../models/User.js';
-import { UserFriendStatusEnum } from '../models/UserFriend.js';
+import { UserFriendStatusEnum, Friend, UserFriend } from '../models/UserFriend.js';
 import { ErrorWithStatusCode } from '../modules/ErrorHandling.js';
 import bcrypt from 'bcryptjs'
 
@@ -59,6 +60,20 @@ class UserRepository {
     }
 
     async sendFriendRequest(senderId: number, receiverId: number) {
+        if (senderId === receiverId) {
+            throw new ErrorWithStatusCode('Cannot send friend request to yourself.', 400);
+        }
+        const existingRequest = await this.context.UserFriend.findOne({
+            where: {
+                [Op.or]: [
+                    { senderID: senderId, receiverID: receiverId },
+                    { senderID: receiverId, receiverID: senderId }
+                ]
+            }
+        });
+        if (existingRequest) {
+            throw new ErrorWithStatusCode('Friend request already sent or received.', 400);
+        }
         return await this.context.UserFriend.create({ 
             senderID: senderId,
             receiverID: receiverId,
@@ -84,29 +99,42 @@ class UserRepository {
     }
 
     async getFriendsForUser(userID: number) {
-        const [fromUserFriends, toUserFriends] = await Promise.all([
-            this.context.UserFriend.findAll({
-                where: {
-                    senderID: userID,
-                    status: UserFriendStatusEnum.Accepted
-                }
-            }),
-            this.context.UserFriend.findAll({
-                where: {
-                    receiverID: userID,
-                    status: UserFriendStatusEnum.Accepted
-                }
-            })
-        ]);
 
-        return fromUserFriends
-    .concat(toUserFriends)
-    .sort((a, b) => {
-        const aDate = a.dateAccepted ?? new Date(0);
-        const bDate = b.dateAccepted ?? new Date(0);
+        const sentRequests = await this.context.UserFriend.findAll({
+            where: { senderID: userID },
+            attributes: ['receiverID', 'status', 'dateCreated', 'dateAccepted']
+        });
 
-        return aDate.getTime() - bDate.getTime();
-    });
+        const receivedRequests = await this.context.UserFriend.findAll({
+            where: { receiverID: userID },
+            attributes: ['senderID', 'status', 'dateCreated', 'dateAccepted']
+        });
+
+
+        const friendIDs = [
+            ...sentRequests.map(req => req.receiverID),
+            ...receivedRequests.map(req => req.senderID)
+        ];
+
+        if (friendIDs.length === 0) return []; 
+
+        const users = await this.context.User.findAll({
+            where: { id: { [Op.in]: friendIDs } }
+        });
+
+        const friends = users.map(user => {
+
+            const userFriend = sentRequests.find(req => req.receiverID === user.id) ||
+                receivedRequests.find(req => req.senderID === user.id);
+
+            return userFriend ? new Friend(user, userFriend) : null;
+        }).filter(friend => friend !== null);
+
+        return friends.sort((a, b) => {
+            const aDate = a.dateAccepted ?? a.dateCreated;
+            const bDate = b.dateAccepted ?? b.dateCreated;
+            return aDate.getTime() - bDate.getTime();
+        });
     }
 }
 

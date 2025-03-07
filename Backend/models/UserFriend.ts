@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
-import { User } from '../config/DbStartup.js'; 
+import { User } from '../models/User.js'; 
 
 enum UserFriendStatusEnum {
     Pending = "Pending",
@@ -82,4 +82,26 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
   return UserFriend;
 };
 
-export { UserFriendStatusEnum }
+class Friend {
+  public id: number;
+  public username: string;
+  public email: string;
+  public status: UserFriendStatusEnum;
+  public dateCreated: Date;
+  public dateAccepted?: Date;
+
+  constructor(user: User, userFriend: UserFriend) {
+    this.id = user.id;
+    this.username = user.username;
+    this.email = user.email;
+    this.status = userFriend.status;
+    this.dateCreated = userFriend.dateCreated;
+    this.dateAccepted = userFriend.dateAccepted;
+  }
+}
+
+export { 
+  UserFriend,
+  UserFriendStatusEnum,
+  Friend
+ }

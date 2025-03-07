@@ -17,6 +17,7 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
 
 router.get("/friends", async (req: Request, res: Response): Promise<void> => {
     try {
+        debugger;
         const { userID } = req.body;
         const friends = await userRepository.getFriendsForUser(userID);
         res.status(200).json(friends);

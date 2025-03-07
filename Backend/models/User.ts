@@ -67,6 +67,7 @@ class UserBasicInfo {
 }
 
 export {
+    User,
     initializeUserModel,
     UserBasicInfo
 }
