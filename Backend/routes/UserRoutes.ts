@@ -14,6 +14,7 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
     }
 });
 
+
 router.get("/friends", async (req: Request, res: Response): Promise<void> => {
     try {
         const { userID } = req.body;
