@@ -5,13 +5,18 @@ import { handleError } from '../modules/ErrorHandling.js';
 
 const router = express.Router();
 
-router.get("/login", async (req: Request, res: Response): Promise<void> => {
+router.post("/login", async (req: Request, res: Response): Promise<void> => {
     try {
-        const { username, password } = req.body;
+        const { username, password } = req.body; // Ensure the fields match the frontend
+
+        // Log the request body for debugging
+        console.log("Login request body:", req.body);
+
+        // Call the repository function to authenticate the user
         const user = await userRepository.loginUser(username, password);
         res.status(200).json(user);
     } catch (error: unknown) {
-        handleError(res, error)
+        handleError(res, error);
     }
 });
 

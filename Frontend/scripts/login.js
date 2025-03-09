@@ -4,23 +4,27 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async function(event) {
         event.preventDefault();
 
-        const email = document.querySelector("input[type='email']").value;
-        const password = document.querySelector("input[type='password']").value;
+        const username = document.querySelector("input[name='username']").value; // Ensure the input name is "username"
+        const password = document.querySelector("input[name='password']").value;
 
         try {
             const response = await fetch("http://localhost:3000/api/auth/login", {
-                method: "GET",
+                method: "POST", // Use POST for login
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }) // GET requests shouldn't have a body, consider changing API to POST
+                body: JSON.stringify({ username, password }) // Send username and password
             });
 
-            if (!response.ok) throw new Error("Login failed");
+            if (!response.ok) {
+                const errorData = await response.json(); // Parse the error response
+                throw new Error(errorData.error || "Login failed");
+            }
 
             const data = await response.json();
             localStorage.setItem("user", JSON.stringify(data)); // Store user data
             window.location.href = "home.html"; // Redirect to home page
         } catch (error) {
-            alert("Login failed. Check your credentials and try again.");
+            console.error("Login error:", error);
+            alert(error.message || "Login failed. Check your credentials and try again.");
         }
     });
 });
