@@ -5,6 +5,7 @@ import gameResultsRoutes from './routes/GameResultsRoutes.js';
 import authRoutes from './routes/AuthRoutes.js';
 import startApp from './config/AppStartup.js';
 import { app, server } from './config/Server.js';
+import './sockets/SocketHandler.js';
 
 const PORT = process.env.PORT || 3000;
 
