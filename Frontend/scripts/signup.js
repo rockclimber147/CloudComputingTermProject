@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json(); // Parse the error response
-                throw new Error(errorData.message || "Signup failed");
+                const data = await response.json(); // Parse the error response
+                throw new Error(data.error || "Signup failed");
             }
 
             const data = await response.json();
