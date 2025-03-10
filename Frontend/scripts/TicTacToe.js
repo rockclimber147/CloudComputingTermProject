@@ -1,18 +1,38 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const cells = document.querySelectorAll(".game-cell");
-    let currentPlayer = "X"; // Start with "X"
+import url from "./url.js";
 
-    cells.forEach(cell => {
-        cell.addEventListener("click", () => {
-            if (cell.textContent === "") { // Only place if empty
-                cell.textContent = currentPlayer;
-                cell.classList.add(currentPlayer === "X" ? "x-mark" : "o-mark"); // Apply different colors
-                currentPlayer = currentPlayer === "X" ? "O" : "X"; // Switch turns
-            }
-        });
+document.addEventListener("DOMContentLoaded", () => {
+  const cells = document.querySelectorAll(".game-cell");
+  let currentPlayer = "X"; // Start with "X"
+
+  cells.forEach((cell) => {
+    cell.addEventListener("click", () => {
+      if (cell.textContent === "") {
+        // Only place if empty
+        cell.textContent = currentPlayer;
+        cell.classList.add(currentPlayer === "X" ? "x-mark" : "o-mark"); // Apply different colors
+        currentPlayer = currentPlayer === "X" ? "O" : "X"; // Switch turns
+      }
     });
+  });
 });
 
+
+
+function getCurrUsername() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    return user ? user.username : "Player 1";
+}
+
+function updatePlayerNames() {
+    const playerXElement = document.querySelector(".player-x");
+    
+    if (playerXElement) {
+        playerXElement.textContent = `${getCurrUsername()} (X)`;
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", updatePlayerNames);
 
 /** frontend code for once the websocket server is set up
  * makes use of Backend payloads for tictactoe games
