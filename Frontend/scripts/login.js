@@ -1,4 +1,10 @@
+import { refreshLogin } from "./refreshLogin.js";
+
 document.addEventListener("DOMContentLoaded", () => {
+    const loggedIn = refreshLogin();
+    if (loggedIn) {
+        window.location.href = "home.html";
+    }
     const form = document.querySelector("form");
 
     form.addEventListener("submit", async function (event) {

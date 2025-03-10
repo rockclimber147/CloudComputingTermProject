@@ -16,16 +16,17 @@ export class SocketSession {
         this.userID = userID;
     }
 
-    async createLobby(lobbyId: string) {
+    async createLobby() {
         if (!this.userID) {
             throw new Error("User not authenticated");
         }
 
         try {
-            await this.db.createLobby(lobbyId, this.userID);
+            const lobbyId = await this.db.createLobby(this.userID);
             await this.socket.join(lobbyId);
             await this.updateLobbyMembers(lobbyId);
         } catch (error: any) {
+            console.log("error creating lobby",error);
             this.socket.emit("lobbyError", error.message);
             return;
         }
@@ -85,10 +86,20 @@ export class SocketSession {
         }
     }
 
-    private async updateLobbyMembers(lobbyId: string) {
-        const lobbyMembers = await this.db.getLobbyMembers(lobbyId);
-        console.log(lobbyMembers);
+    async leaveAllLobbies() {
+        const lobbyIds = Object.keys(this.socket.rooms).filter(
+            (room) => room !== this.socket.id
+        );
 
-        io.to(lobbyId).emit("updateLobby", lobbyMembers);
+        for (const lobbyId of lobbyIds) {
+            await this.leaveLobby(lobbyId);
+        }
+    }
+
+    private async updateLobbyMembers(lobbyId: string) {
+        const lobby = await this.db.getLobby(lobbyId);
+        console.log(lobby);
+
+        io.to(lobbyId).emit("updateLobby", lobby);
     }
 }

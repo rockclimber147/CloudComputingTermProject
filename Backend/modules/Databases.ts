@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import redis from "../config/RedisStartup.js";
 
 export abstract class LobbyDatabase {
@@ -6,7 +7,7 @@ export abstract class LobbyDatabase {
     }
 
     abstract connect(): void;
-    abstract createLobby(lobbyId: string, hostID: number): Promise<void>;
+    abstract createLobby(hostID: number): Promise<string>;
     abstract joinLobby(lobbyId: string, userId: number): Promise<void>;
     abstract leaveLobby(lobbyId: string, userId: number): Promise<void>;
     abstract getLobby(lobbyId: string): Promise<any>;
@@ -18,7 +19,7 @@ export class RedisDatabase extends LobbyDatabase {
         redis.connect();
     }
 
-    createLobby(lobbyId: string, host: number): Promise<void> {
+    createLobby(host: number): Promise<string> {
         throw new Error("Method not implemented.");
     }
 
@@ -51,12 +52,16 @@ export class LocalLobbyDatabase extends LobbyDatabase {
         // nothing to do here
     }
 
-    async createLobby(lobbyId: string, host: number): Promise<void> {
-        if (this.lobbies.has(lobbyId)) {
-            throw new Error("Lobby already exists");
+    async createLobby(host: number): Promise<string> {
+        let lobbyId = randomBytes(8).toString("hex");
+
+        while (this.lobbies.has(lobbyId)) {
+            lobbyId = randomBytes(8).toString("hex");
         }
 
         this.lobbies.set(lobbyId, { id: lobbyId, users: [host], host });
+
+        return lobbyId;
     }
 
     async joinLobby(lobbyId: string, userId: number): Promise<void> {

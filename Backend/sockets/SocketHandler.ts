@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { Socket } from "socket.io";
 import { io } from "../config/SocketServer.js";
 import { SocketSession } from "./SocketSession.js";
@@ -10,10 +11,14 @@ io.on("connection", async (socket: Socket) => {
     socketConnections[socket.id] = new SocketSession(socket);
 
     // Create a lobby
-    socket.on("createLobby", async (lobbyID: string) => {
+    socket.on("createLobby", async () => {
+        console.log("Create lobby");
+
         try {
-            await socketConnections[socket.id].createLobby(lobbyID);
+            await socketConnections[socket.id].createLobby();
         } catch (error: any) {
+            console.log("error creating lobby", error);
+
             socket.emit("error", error.message);
             return;
         }
@@ -40,11 +45,13 @@ io.on("connection", async (socket: Socket) => {
     });
 
     socket.on("login", (token: string) => {
+        console.log("Login with token", token);
+        
         try {
             const userID = verifyToken(token);
             socketConnections[socket.id].setUserID(userID);
         } catch (error: any) {
-            console.log(error);
+            console.log("Error verifying token", error);
             socket.emit("error", error.message);
             return;
         }

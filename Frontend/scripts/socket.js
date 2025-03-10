@@ -1,9 +1,9 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 
+//TODO: Change the URL to url saved at url.js
 const socket = io("http://localhost:3000");
 
 const token = localStorage.getItem("token");
-// const token = "123";
 
 if (!token) {
     alert("You need to login first");
@@ -12,11 +12,37 @@ if (!token) {
 
 socket.on("connect", () => {
     console.log("Connected to server");
-    socket.emit("login", token);
 });
 
 socket.on("disconnect", () => {
     console.log("Disconnected from server");
 });
 
-export default socket;
+socket.on("updateLobby", (lobbies) => {
+    if (lobbies == null) {
+        localStorage.removeItem("lobby");
+    }
+    localStorage.setItem("lobby", JSON.stringify(lobbies));
+});
+
+//TODO: Add a text box or something for the error instead of alert
+socket.on("error", (error) => {
+    alert(error);
+});
+
+export function createLobby() {
+    socket.emit("createLobby");
+}
+
+export function joinLobby(lobbyId) {
+    socket.emit("joinLobby", lobbyId);
+}
+
+export function leaveLobby() {
+    socket.emit("leaveLobby");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    socket.emit("login", token);
+    createLobby();
+});
