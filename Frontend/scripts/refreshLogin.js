@@ -1,8 +1,6 @@
 export async function refreshLogin(){
     const token = localStorage.getItem("token");
     if (!token) {
-        alert("You need to login first");
-        window.location.href = "index.html";
         return false;
     }
 
@@ -17,8 +15,7 @@ export async function refreshLogin(){
     if (!result.ok) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        alert("You need to login first");
-        window.location.href = "login.html";
+        return false;
     }
 
     const data = await result.json();

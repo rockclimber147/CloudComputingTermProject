@@ -1,7 +1,7 @@
 import { refreshLogin } from "./refreshLogin.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-    const loggedIn = refreshLogin();
+document.addEventListener("DOMContentLoaded", async () => {
+    const loggedIn = await refreshLogin();
     if (loggedIn) {
         window.location.href = "home.html";
     }
