@@ -7,6 +7,7 @@ const socketConnections: { [key: string]: SocketSession } = {};
 io.on('connection', async (socket: Socket) => {
     console.log('A user connected:', socket.id);
     socketConnections[socket.id] = new SocketSession(socket);
+    socketConnections[socket.id].disconnectUser();
 
     // Create a lobby
     socket.on('createLobby', async (lobbyID: string) => {

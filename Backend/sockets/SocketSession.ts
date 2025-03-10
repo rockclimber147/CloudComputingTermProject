@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { LobbyDatabase, RedisDatabase } from '../modules/Databases.js';
+import { LobbyDatabase, LocalLobbyDatabase } from '../modules/Databases.js';
 import { io } from '../config/SocketServer.js';
 
 export class SocketSession {
@@ -8,7 +8,7 @@ export class SocketSession {
     userID: string | null;
     constructor(socket: Socket) {
         this.socket = socket;
-        this.db = new RedisDatabase();
+        this.db = new LocalLobbyDatabase();
         this.userID = null;
     }
 
@@ -65,11 +65,13 @@ export class SocketSession {
         if (!this.userID) {
             return;
         }
-        const user = await this.db.getUser(this.userID);
+        // const user = await this.db.getUser(this.userID);
 
-        if (user.lobbyId) {
-            await this.db.leaveLobby(user.lobbyId, this.userID);
-        }
+        console.log(this.socket.rooms);
+
+        // if (user.lobbyId) {
+        //     await this.db.leaveLobby(user.lobbyId, this.userID);
+        // }
     }
 
     async updateLobby(lobbyId: string) {
