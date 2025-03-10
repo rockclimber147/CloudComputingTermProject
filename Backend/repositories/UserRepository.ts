@@ -59,6 +59,15 @@ class UserRepository {
 
     }
 
+    async getUser(userID: number) {
+        const user = await this.context.User.findByPk(userID);
+        if (!user) {
+            throw new ErrorWithStatusCode(`User with id ${userID} not found!`, 404);
+        }
+        
+        return new UserBasicInfo(user);
+    }
+
     async logoutUser(userID: number) {
         return await this.context.User.findByPk(userID);
     }

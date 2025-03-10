@@ -1,9 +1,14 @@
+import { refreshLogin } from "./refreshLogin.js";
 import url from "./url.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    const loggedIn = await refreshLogin();
+    if (loggedIn) {
+        window.location.href = "home.html";
+    }
     const form = document.querySelector("form");
 
-    form.addEventListener("submit", async function(event) {
+    form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
         const username = document.querySelector("input[name='username']").value;
@@ -14,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`${url}/api/auth/create`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ username, email, password }),
             });
 
             if (!response.ok) {
@@ -23,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = await response.json();
-            localStorage.setItem("user", JSON.stringify(data));
+            localStorage.setItem("user", JSON.stringify(data.user));
+            localStorage.setItem("token", data.token);
             window.location.href = "home.html";
         } catch (error) {
             console.error("Signup error:", error);
