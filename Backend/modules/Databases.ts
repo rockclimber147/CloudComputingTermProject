@@ -12,6 +12,7 @@ export abstract class LobbyDatabase {
     abstract leaveLobby(lobbyId: string, userId: number): Promise<void>;
     abstract getLobby(lobbyId: string): Promise<any>;
     abstract getLobbyMembers(lobbyId: string): Promise<number[]>;
+    abstract printLobbies(): void;
 }
 
 export class RedisDatabase extends LobbyDatabase {
@@ -38,14 +39,18 @@ export class RedisDatabase extends LobbyDatabase {
     getLobbyMembers(lobbyId: string): Promise<number[]> {
         throw new Error("Method not implemented.");
     }
+
+    printLobbies(): void {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export class LocalLobbyDatabase extends LobbyDatabase {
-    private lobbies: Map<string, { id: string; users: number[]; host: number }>;
+    private static lobbies: Map<string, { id: string; users: number[]; host: number }>;
 
     constructor() {
         super();
-        this.lobbies = new Map();
+        LocalLobbyDatabase.lobbies = this.getLobbies();
     }
 
     connect(): void {
@@ -53,57 +58,73 @@ export class LocalLobbyDatabase extends LobbyDatabase {
     }
 
     async createLobby(host: number): Promise<string> {
+        console.log("Creating lobby", host);
         let lobbyId = randomBytes(8).toString("hex");
 
-        while (this.lobbies.has(lobbyId)) {
+        while (LocalLobbyDatabase.lobbies.has(lobbyId)) {
             lobbyId = randomBytes(8).toString("hex");
         }
 
-        this.lobbies.set(lobbyId, { id: lobbyId, users: [host], host });
+        LocalLobbyDatabase.lobbies.set(lobbyId, { id: lobbyId, users: [host], host });
 
         return lobbyId;
     }
 
     async joinLobby(lobbyId: string, userId: number): Promise<void> {
-        if (!this.lobbies.has(lobbyId)) {
+        console.log("Joining lobby", lobbyId, userId);
+
+        if (!LocalLobbyDatabase.lobbies.has(lobbyId)) {
             throw new Error("Lobby does not exist");
         }
 
-        const lobby = this.lobbies.get(lobbyId);
-
-        // Check if the user is already in the lobby
-        if (lobby && !lobby.users.includes(userId)) {
-            lobby.users.push(userId); // Add the user to the lobby
-            this.lobbies.set(lobbyId, lobby); // Update the lobby in the map
-        }
+        LocalLobbyDatabase.lobbies.get(lobbyId)?.users.push(userId);
     }
 
     async leaveLobby(lobbyId: string, userId: number): Promise<void> {
-        if (!this.lobbies.has(lobbyId)) {
+        console.log("Leaving lobby", lobbyId, userId);
+
+        if (!LocalLobbyDatabase.lobbies.has(lobbyId)) {
             throw new Error("Lobby does not exist");
         }
-    
-        const lobby = this.lobbies.get(lobbyId);
-    
-        if (lobby) {
-            // Remove the user from the lobby
-            lobby.users = lobby.users.filter((user) => user !== userId);
-    
-            // If the lobby is empty, delete it
-            if (lobby.users.length === 0) {
-                this.lobbies.delete(lobbyId);  // This will delete the lobby from memory
-            } else {
-                // Update the lobby in the map
-                this.lobbies.set(lobbyId, lobby);
-            }
+
+        const lobby = LocalLobbyDatabase.lobbies.get(lobbyId);
+        if (!lobby) {
+            throw new Error("Lobby does not exist");
+        }
+
+        if (!lobby.users.includes(userId)) {
+            throw new Error("User not in lobby");
+        }
+
+        lobby.users = lobby.users.filter((id) => id !== userId);
+
+        if (lobby.users.length === 0) {
+            LocalLobbyDatabase.lobbies.delete(lobbyId);
+        }
+
+        if (lobby.host === userId) {
+            const randomIndex = Math.floor(Math.random() * lobby.users.length);
+            lobby.host = lobby.users[randomIndex];
         }
     }
 
     async getLobby(lobbyId: string) {
-        return this.lobbies.get(lobbyId);
+        return LocalLobbyDatabase.lobbies.get(lobbyId);
     }
 
     async getLobbyMembers(lobbyId: string): Promise<number[]> {
-        return this.lobbies.get(lobbyId)?.users || [];
+        return LocalLobbyDatabase.lobbies.get(lobbyId)?.users || [];
+    }
+
+    printLobbies(): void {
+        console.log(LocalLobbyDatabase.lobbies);
+    }
+
+    private getLobbies(): Map<string, { id: string; users: number[]; host: number }> {
+        if (!LocalLobbyDatabase.lobbies) {
+            LocalLobbyDatabase.lobbies = new Map();
+        }
+
+        return LocalLobbyDatabase.lobbies;
     }
 }

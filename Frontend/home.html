@@ -8,6 +8,7 @@
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
             rel="stylesheet" />
         <link rel="icon" type="image/x-icon" href="public/favicon.ico" />
+        <link rel="stylesheet" href="styles/home.css">
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -38,22 +39,40 @@
             <h2>Welcome, User!</h2>
             <p class="lead">Join a lobby or invite friends to play.</p>
 
-            <!-- Display the Current Lobby -->
-            <div id="lobby-info" class="alert alert-info">
-                <p><strong>Lobby ID:</strong> Waiting...</p>
-                <p><strong>Players:</strong> None yet</p>
+            <!-- Current Lobby -->
+            <div id="lobby-info" class="card shadow-sm p-4">
+                <h4 class="text-center mb-3">🎮 Game Lobby</h4>
+            
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Lobby ID:</strong></p>
+                    <div class="bg-light border rounded p-2 text-center">
+                        <span id="lobby-id-text" class="fw-bold">Loading...</span>
+                    </div>
+                </div>
+            
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Players:</strong></p>
+                    <ul id="lobby-users" class="list-group list-group-flush border rounded p-2 bg-light">
+                        <li class="text-muted text-center">Waiting for players...</li>
+                    </ul>
+                </div>
+                <div class="d-flex justify-content-center mt-3">
+                    <button id="start-game-btn" class="btn btn-success w-50 fw-bold">🚀 Start Game</button>
+                </div>
             </div>
+            <br>
 
-            <!-- Join Lobby Form -->
+            <!-- Lobby Form -->
             <div class="mb-3">
                 <input
                     type="text"
                     id="lobby-id-input"
                     class="form-control"
                     placeholder="Enter Lobby ID" />
-                <button class="btn btn-primary mt-2" id="join-lobby-btn">
-                    Join Lobby
-                </button>
+                    <br>
+                <div class="d-flex justify-content-center mt-3">
+                    <button class="btn btn-success fw-bold" id="join-lobby-btn">Join Lobby</button>
+                </div>
             </div>
         </div>
 
