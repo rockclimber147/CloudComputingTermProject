@@ -1,6 +1,7 @@
 import { refreshLogin } from "./refreshLogin.js";
 import url from "./url.js";
 
+
 document.addEventListener("DOMContentLoaded", async () => {
     const loggedIn = await refreshLogin();
     if (loggedIn) {
