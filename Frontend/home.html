@@ -8,6 +8,8 @@
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
             rel="stylesheet" />
         <link rel="icon" type="image/x-icon" href="public/favicon.ico" />
+        <link rel="stylesheet" href="styles/home.css">
+
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -38,38 +40,40 @@
             <h2>Welcome, User!</h2>
             <p class="lead">Join a lobby or invite friends to play.</p>
 
-            <div class="row">
-                <!-- Lobby Section -->
-                <div class="col-md-6">
-                    <h3>Lobbies</h3>
-                    <ul class="list-group mb-3" id="lobby-list">
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            Lobby 1 <button class="btn btn-primary btn-sm">Join</button>
-                        </li>
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            Lobby 2 <button class="btn btn-primary btn-sm">Join</button>
-                        </li>
-                    </ul>
-                    <button class="btn btn-success w-100">Create Lobby</button>
+            <!-- Current Lobby -->
+            <div id="lobby-info" class="card shadow-sm p-4">
+                <h4 class="text-center mb-3">🎮 Game Lobby</h4>
+            
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Lobby ID:</strong></p>
+                    <div class="bg-light border rounded p-2 text-center">
+                        <span id="lobby-id-text" class="fw-bold">Loading...</span>
+                    </div>
                 </div>
-
-                <!-- Online Users Section -->
-                <div class="col-md-6">
-                    <h3>Online Users</h3>
-                    <ul class="list-group" id="online-users-list">
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            User 1
-                            <button class="btn btn-warning btn-sm">Invite</button>
-                        </li>
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            User 2
-                            <button class="btn btn-warning btn-sm">Invite</button>
-                        </li>
+            
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Players:</strong></p>
+                    <ul id="lobby-users" class="list-group list-group-flush border rounded p-2 bg-light">
+                        <li class="text-muted text-center">Waiting for players...</li>
                     </ul>
+                </div>
+                <div class="d-flex justify-content-center mt-3">
+                    <button id="start-game-btn" class="btn btn-success w-50 fw-bold" href="TicTacToe.html">🚀 Start Game</button>
+                </div>
+            </div>
+            <br>
+
+            <!-- Lobby Form -->
+            <div class="mb-3">
+                <input
+                    type="text"
+                    id="lobby-id-input"
+                    class="form-control"
+                    placeholder="Enter Lobby ID" />
+                    <br>
+                <div class="d-flex justify-content-center mt-3">
+                    <button class="btn btn-success fw-bold" id="join-lobby-btn">Join Lobby</button>
+
                 </div>
             </div>
         </div>
