@@ -21,15 +21,10 @@ export class SocketSession {
             throw new Error("User not authenticated");
         }
 
-        try {
-            const lobbyId = await this.db.createLobby(this.userID);
-            await this.socket.join(lobbyId);
-            await this.updateLobbyMembers(lobbyId);
-        } catch (error: any) {
-            console.log("error creating lobby",error);
-            this.socket.emit("lobbyError", error.message);
-            return;
-        }
+        const lobbyId = await this.db.createLobby(this.userID);
+        await this.socket.join(lobbyId);
+        console.log(this.socket.rooms);
+        await this.updateLobbyMembers(lobbyId);
     }
 
     async joinLobby(lobbyId: string) {
@@ -37,14 +32,10 @@ export class SocketSession {
             throw new Error("User not authenticated");
         }
 
-        try {
-            await this.db.joinLobby(lobbyId, this.userID);
-            await this.socket.join(lobbyId);
-            await this.updateLobbyMembers(lobbyId);
-        } catch (error: any) {
-            this.socket.emit("lobbyError", error.message);
-            return;
-        }
+        await this.leaveAllLobbies();
+        await this.db.joinLobby(lobbyId, this.userID);
+        await this.socket.join(lobbyId);
+        await this.updateLobbyMembers(lobbyId);
     }
 
     async leaveLobby(lobbyId: string) {
@@ -52,44 +43,29 @@ export class SocketSession {
             throw new Error("User not authenticated");
         }
 
-        try {
-            await this.db.leaveLobby(lobbyId, this.userID);
-            await this.socket.leave(lobbyId);
-            await this.updateLobbyMembers(lobbyId);
-        } catch (error: any) {
-            this.socket.emit("lobbyError", error.message);
-            return;
-        }
-    }
-
-    async disconnectUser() {
-        if (!this.userID) {
-            return;
-        }
-
-        const lobbyId = Object.keys(this.socket.rooms).find(
-            (room) => room !== this.socket.id
-        );
-
-        if (lobbyId) {
-            await this.leaveLobby(lobbyId);
-        }
+        await this.db.leaveLobby(lobbyId, this.userID);
+        await this.socket.leave(lobbyId);
+        await this.updateLobbyMembers(lobbyId);
     }
 
     async updateLobby(lobbyId: string) {
-        try {
-            const lobby = await this.db.getLobby(lobbyId);
-            io.to(lobbyId).emit("updateLobby", lobby.members);
-        } catch (error: any) {
-            this.socket.emit("lobbyError", error.message);
-            return;
-        }
+        const lobby = await this.db.getLobby(lobbyId);
+        io.to(lobbyId).emit("updateLobby", lobby.members);
     }
 
     async leaveAllLobbies() {
-        const lobbyIds = Object.keys(this.socket.rooms).filter(
-            (room) => room !== this.socket.id
-        );
+        if (!this.userID) {
+            throw new Error("User not authenticated");
+        }
+
+        const lobbyIds = [];
+        for (const room of this.socket.rooms) {
+            if (room !== this.socket.id) {
+                lobbyIds.push(room);
+            }
+        }
+
+        console.log("Leaving lobbies", lobbyIds);
 
         for (const lobbyId of lobbyIds) {
             await this.leaveLobby(lobbyId);
@@ -99,6 +75,7 @@ export class SocketSession {
     private async updateLobbyMembers(lobbyId: string) {
         const lobby = await this.db.getLobby(lobbyId);
         console.log(lobby);
+        this.db.printLobbies();
 
         io.to(lobbyId).emit("updateLobby", lobby);
     }

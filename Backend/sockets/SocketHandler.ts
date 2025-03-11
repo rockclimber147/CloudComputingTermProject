@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { Socket } from "socket.io";
 import { io } from "../config/SocketServer.js";
 import { SocketSession } from "./SocketSession.js";
@@ -12,13 +11,10 @@ io.on("connection", async (socket: Socket) => {
 
     // Create a lobby
     socket.on("createLobby", async () => {
-        console.log("Create lobby");
-
         try {
             await socketConnections[socket.id].createLobby();
         } catch (error: any) {
             console.log("error creating lobby", error);
-
             socket.emit("error", error.message);
             return;
         }
@@ -26,9 +22,12 @@ io.on("connection", async (socket: Socket) => {
 
     // Join a lobby
     socket.on("joinLobby", async (lobbyID: string) => {
+        console.log("Join lobby request", lobbyID);
         try {
             await socketConnections[socket.id].joinLobby(lobbyID);
+            console.log("Joined lobby", lobbyID);
         } catch (error: any) {
+            console.log("error joining lobby", error);
             socket.emit("error", error.message);
             return;
         }
@@ -36,9 +35,11 @@ io.on("connection", async (socket: Socket) => {
 
     // Leave a lobby
     socket.on("leaveLobby", async (lobbyID: string) => {
+        console.log("Leave lobby request", lobbyID);
         try {
             await socketConnections[socket.id].leaveLobby(lobbyID);
         } catch (error: any) {
+            console.log("error leaving lobby", error);
             socket.emit("error", error.message);
             return;
         }
@@ -46,7 +47,7 @@ io.on("connection", async (socket: Socket) => {
 
     socket.on("login", (token: string) => {
         console.log("Login with token", token);
-        
+
         try {
             const userID = verifyToken(token);
             socketConnections[socket.id].setUserID(userID);
@@ -58,10 +59,9 @@ io.on("connection", async (socket: Socket) => {
     });
 
     // Handle disconnection
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
         try {
             console.log(`User ${socket.id} disconnected`);
-            socketConnections[socket.id].disconnectUser();
             delete socketConnections[socket.id];
         } catch (error: any) {
             console.log(error);
