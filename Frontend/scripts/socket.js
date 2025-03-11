@@ -36,28 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-window.addEventListener("beforeunload", (event) => {
-    const lobby = JSON.parse(localStorage.getItem("lobby"));
-    if (lobby) {        
-        leaveLobby(lobby.id);
-        localStorage.removeItem("lobby");
-    }
-
-    socket.disconnect();
-});
-
 export function createLobby() {
     socket.emit("createLobby");
 }
 
 export function joinLobby(lobbyId) {
     socket.emit("joinLobby", lobbyId);
-}
-
-export function leaveLobby(lobbyId) {
-    console.log("Leaving lobby", lobbyId);
-
-    socket.emit("leaveLobby", lobbyId);
 }
 
 export default socket;

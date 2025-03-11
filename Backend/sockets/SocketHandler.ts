@@ -34,10 +34,11 @@ io.on("connection", async (socket: Socket) => {
     });
 
     // Leave a lobby
-    socket.on("leaveLobby", async (lobbyID: string) => {
-        console.log("Leave lobby request", lobbyID);
+    socket.on("leaveLobby", async () => {
+        console.log("Leave lobby request", socket.id);
         try {
-            await socketConnections[socket.id].leaveLobby(lobbyID);
+            await socketConnections[socket.id].leaveLobby();
+            await socketConnections[socket.id].createLobby()
         } catch (error: any) {
             console.log("error leaving lobby", error);
             socket.emit("error", error.message);
@@ -58,10 +59,42 @@ io.on("connection", async (socket: Socket) => {
         }
     });
 
+    socket.on("setGameId", async (gameId: string) => {
+        if (!socketConnections[socket.id].hasGameId()) {
+            console.log("setting game id", gameId);
+            socketConnections[socket.id].setGameID(gameId);
+        }
+    });
+
+    socket.on("startGame", async (gameType: number) => {
+        console.log("Game start request", gameType);
+        try {
+            // Create a game
+            await socketConnections[socket.id].createGame(gameType);
+            console.log("Game created");
+        } catch (error: any) {
+            console.log("error creating game", error);
+            socket.emit("error", error.message);
+            return;
+        }
+    });
+
+    socket.on("gameMakeMove", async (index: number) => {
+        try {
+            // Create a game
+            await socketConnections[socket.id].makeMove(index);
+        } catch (error: any) {
+            console.log("error makeing move", error);
+            socket.emit("error", error.message);
+            return;
+        }
+    });
+
     // Handle disconnection
     socket.on("disconnect", async () => {
         try {
             console.log(`User ${socket.id} disconnected`);
+            await socketConnections[socket.id].leaveLobby();
             delete socketConnections[socket.id];
         } catch (error: any) {
             console.log(error);

@@ -1,33 +1,11 @@
 import { TicTacToeGame } from "./TicTacToe/TicTacToeGame.js";
+import { Game, IGameState } from "./Game.js";
 
 export enum GamesEnum {
-    TIC_TAC_TOE = 'tic tac toe'
+    TIC_TAC_TOE
 }
 
 type GameConstructor = new (gameId: string, players: string[]) => Game<any>;
-
-export interface IGameState {
-    gameId: string;
-    players: string[];
-    isGameOver(): boolean;
-    getWinner(): string | null;
-}
-
-export abstract class Game<TMove> implements IGameState {
-  gameId: string;
-  players: string[];
-  protected state: any;
-
-  constructor(gameId: string, players: string[]) {
-    this.gameId = gameId;
-    this.players = players;
-  }
-  
-  abstract isGameOver(): boolean;
-  abstract getWinner(): string | null;
-  abstract validateMove(playerId: string, move: TMove): boolean;
-  abstract applyMove(playerId: string, move: TMove): void;
-}
 
 
 export class GameManager {
@@ -48,7 +26,7 @@ export class GameManager {
       game = new GameClass(gameId, players);
       
       this.games.set(gameId, game);
-        return game;
+      return game;
   }
 
   handleMove(gameId: string, playerId: string, move: any): boolean {
