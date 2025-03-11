@@ -38,39 +38,22 @@
             <h2>Welcome, User!</h2>
             <p class="lead">Join a lobby or invite friends to play.</p>
 
-            <div class="row">
-                <!-- Lobby Section -->
-                <div class="col-md-6">
-                    <h3>Lobbies</h3>
-                    <ul class="list-group mb-3" id="lobby-list">
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            Lobby 1 <button class="btn btn-primary btn-sm">Join</button>
-                        </li>
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            Lobby 2 <button class="btn btn-primary btn-sm">Join</button>
-                        </li>
-                    </ul>
-                    <button class="btn btn-success w-100">Create Lobby</button>
-                </div>
+            <!-- Display the Current Lobby -->
+            <div id="lobby-info" class="alert alert-info">
+                <p><strong>Lobby ID:</strong> Waiting...</p>
+                <p><strong>Players:</strong> None yet</p>
+            </div>
 
-                <!-- Online Users Section -->
-                <div class="col-md-6">
-                    <h3>Online Users</h3>
-                    <ul class="list-group" id="online-users-list">
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            User 1
-                            <button class="btn btn-warning btn-sm">Invite</button>
-                        </li>
-                        <li
-                            class="list-group-item d-flex justify-content-between align-items-center">
-                            User 2
-                            <button class="btn btn-warning btn-sm">Invite</button>
-                        </li>
-                    </ul>
-                </div>
+            <!-- Join Lobby Form -->
+            <div class="mb-3">
+                <input
+                    type="text"
+                    id="lobby-id-input"
+                    class="form-control"
+                    placeholder="Enter Lobby ID" />
+                <button class="btn btn-primary mt-2" id="join-lobby-btn">
+                    Join Lobby
+                </button>
             </div>
         </div>
 

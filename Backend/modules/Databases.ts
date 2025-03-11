@@ -69,17 +69,34 @@ export class LocalLobbyDatabase extends LobbyDatabase {
             throw new Error("Lobby does not exist");
         }
 
-        this.lobbies.get(lobbyId)?.users.push(userId);
+        const lobby = this.lobbies.get(lobbyId);
+
+        // Check if the user is already in the lobby
+        if (lobby && !lobby.users.includes(userId)) {
+            lobby.users.push(userId); // Add the user to the lobby
+            this.lobbies.set(lobbyId, lobby); // Update the lobby in the map
+        }
     }
 
     async leaveLobby(lobbyId: string, userId: number): Promise<void> {
         if (!this.lobbies.has(lobbyId)) {
             throw new Error("Lobby does not exist");
         }
-
-        this.lobbies
-            .get(lobbyId)
-            ?.users.splice(this.lobbies.get(lobbyId)?.users.indexOf(userId) || 0, 1);
+    
+        const lobby = this.lobbies.get(lobbyId);
+    
+        if (lobby) {
+            // Remove the user from the lobby
+            lobby.users = lobby.users.filter((user) => user !== userId);
+    
+            // If the lobby is empty, delete it
+            if (lobby.users.length === 0) {
+                this.lobbies.delete(lobbyId);  // This will delete the lobby from memory
+            } else {
+                // Update the lobby in the map
+                this.lobbies.set(lobbyId, lobby);
+            }
+        }
     }
 
     async getLobby(lobbyId: string) {
