@@ -10,20 +10,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const username = document.querySelector("input[name='username']").value; // Ensure the input name is "username"
-        const password = document.querySelector("input[name='password']").value;
+    const username = document.querySelector("input[name='username']").value;
+    const password = document.querySelector("input[name='password']").value;
 
-        try {
-            const response = await fetch("http://localhost:3000/api/auth/login", {
-                method: "POST", // Use POST for login
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }), // Send username and password
-            });
+    try {
+      const response = await fetch(`${url}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }), 
+      });
 
-            if (!response.ok) {
-                const errorData = await response.json(); // Parse the error response
-                throw new Error(errorData.error || "Login failed");
-            }
+      if (!response.ok) {
+        const errorData = await response.json(); 
+        throw new Error(errorData.error || "Login failed");
+      }
 
             const data = await response.json();
             localStorage.setItem("user", JSON.stringify(data.user)); // Store user data

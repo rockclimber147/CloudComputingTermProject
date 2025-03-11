@@ -15,14 +15,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const password = document.querySelector("input[name='password']").value;
 
         try {
-            const response = await fetch("http://localhost:3000/api/auth/create", {
+            const response = await fetch(`${url}/api/auth/create`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, email, password }),
             });
 
             if (!response.ok) {
-                const data = await response.json(); // Parse the error response
+                const data = await response.json(); 
                 throw new Error(data.error || "Signup failed");
             }
 
