@@ -1,7 +1,7 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+import url from "./url.js";
 
-//TODO: Change the URL to url saved at url.js
-const socket = io("http://localhost:3000");
+const socket = io(url);
 
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("token");
