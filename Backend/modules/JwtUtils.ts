@@ -1,6 +1,12 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
 
+interface TokenPayload {
+    userID: number;
+    iat: number;
+    exp: number;
+}
+
 export const JWT_SECRET = process.env.JWT_SECRET;
 
 export function createToken(userID: number): string {
@@ -21,9 +27,10 @@ export function verifyToken(token: string): number {
         throw new Error("JWT_SECRET is not defined");
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-    if (typeof decoded === "string") {
-        throw new Error("Invalid token");
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+
+    if (!decoded.userID) {
+        throw new Error("Invalid token: Missing userID");
     }
 
     return decoded.userID;
