@@ -80,6 +80,11 @@ function showBoard() {
     document.getElementById("home-front").style.display = "none";
 }
 
+function showLobby(){
+    document.getElementById("game-front").style.display = "none";
+    document.getElementById("home-front").style.display = "block";
+}
+
 function makeMove(index) {
     if (!ongoingGame) return;
     socket.emit("gameMakeMove", index);
@@ -103,26 +108,29 @@ function startGame() {
 
     if (!hostPlayer || !otherPlayer) return;
 
-    document.querySelector(".player-x").textContent = `${hostPlayer.username} (X)`;
-    document.querySelector(".player-o").textContent = `${otherPlayer.username} (O)`;
+       
+    const isHost = currentUser.id === hostPlayer.id;
+
+        
+    if (isHost) {
+        document.querySelector(".player-x").textContent = `You (X)`;
+        document.querySelector(".player-o").textContent = `${otherPlayer.username} (O)`;
+    } else {
+         document.querySelector(".player-x").textContent = `${hostPlayer.username} (X)`;
+        document.querySelector(".player-o").textContent = `You (O)`;
+    }
+
     document.getElementById("player-1").textContent = `${hostPlayer.username} (X)`;
     document.getElementById("player-2").textContent = `${otherPlayer.username} (O)`;
     xPlayer = hostPlayer.id;
     yPlayer = otherPlayer.id;
 
-    // if (currentUser.id === hostId) {
-    //     playerSymbol = "X";
-    //     opponentSymbol = "O";
-    // } else {
-    //     playerSymbol = "O";
-    //     opponentSymbol = "X";
-    // }
 }
 
 function endGame(winner) {
     alert(`${winner} won the game`);
     ongoingGame = false;
-    // document.getElementById("game-container").style.display = "none";
+    showLobby();
 }
 
 function updateGame(payload) {
@@ -133,13 +141,6 @@ function updateGame(payload) {
     updateTurnHighlight();
 }
 
-// function switchTurn() {
-//     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-//     updateTurnHighlight();
-
-//     const playerColor = currentPlayer === 'X' ? 'rgba(0, 123, 255, 0.6)' : 'rgba(255, 99, 71, 0.6)';
-//     socket.emit("updatePlayerTurn", { player: currentPlayer, color: playerColor });
-// }
 
 function updateTurnHighlight() {
     const gameContainer = document.getElementById("game-container");
