@@ -12,15 +12,14 @@ class ErrorWithStatusCode extends Error {
 }
 
 const handleError = (res: Response, error: unknown): void => {
+    // Check if the error is an instance of ErrorWithStatusCode
+    console.log(error)
     if (error instanceof ErrorWithStatusCode) {
         res.status(error.statusCode).json({ error: error.message });
-    } else if (error instanceof Error) {
-        // Handle generic errors
-        res.status(500).json({ error: error.message });
     } else {
-        // Handle unexpected errors
         res.status(500).json({ error: 'Unknown error occurred' });
     }
-};
+}
+
 
 export { ErrorWithStatusCode, handleError}

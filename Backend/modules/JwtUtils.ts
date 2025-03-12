@@ -1,5 +1,6 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
+import redisService from "../config/RedisStartup.js";
 
 interface TokenPayload {
     userID: number;
