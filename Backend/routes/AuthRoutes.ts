@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { userRepository } from "../config/RepositoryInit.js";
 import { handleError } from "../modules/ErrorHandling.js";
 import { createToken, verifyToken } from "../modules/JwtUtils.js";
@@ -58,5 +58,27 @@ router.post("/verify", async (req: Request, res: Response): Promise<void> => {
         handleError(res, error);
     }
 });
+
+export interface AuthRequest extends Request {
+    userID?: number;
+}
+
+export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized: No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = verifyToken(token)
+        req.userID = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ error: "Unauthorized: Invalid token" });
+    }
+}
 
 export default router;
