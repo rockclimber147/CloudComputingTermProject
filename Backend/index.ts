@@ -44,7 +44,7 @@ app.use("/api/auth", authRoutes);
 
 // Jank to make authMiddleware global to all other api routes
 app.use((req, res, next) => {
-    if (req.originalUrl.startsWith('/api/auth')) {
+    if (req.path.startsWith('/api/auth')) {
         return next();
     }
     authMiddleware(req, res, next);
