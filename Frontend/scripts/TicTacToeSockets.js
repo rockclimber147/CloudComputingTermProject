@@ -9,7 +9,9 @@ const TicTacToeEvent = {
 };
 
 let ongoingGame = false;
-let currentPlayer = 'X';
+let currentTurnId;
+let xPlayer;
+let yPlayer;
 
 // maybe do like a prefered on each side and they have their own letter
 
@@ -23,8 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ongoingGame == false) {
             startGame();
         }
-        socket.emit("setGameId", payload.gameId);
-        drawBoard(payload.board);
+        updateGame(payload);
     });
 
     socket.on("gameOver", (winner) => {
@@ -55,19 +56,19 @@ function drawBoard(board) {
 
     const hostId = lobby.host;
     const players = lobby.users;
-    
-    const hostPlayer = players.find(user => user.id === hostId);
-    const otherPlayer = players.find(user => user.id !== hostId);
+
+    const hostPlayer = players.find((user) => user.id === hostId);
+    const otherPlayer = players.find((user) => user.id !== hostId);
 
     if (!hostPlayer || !otherPlayer) return;
 
     for (let i = 0; i < board.length; i++) {
         if (board[i] == hostPlayer.id.toString()) {
             grid[i].textContent = "X";
-            grid[i].classList.add("x-mark"); 
+            grid[i].classList.add("x-mark");
         } else if (board[i] == otherPlayer.id.toString()) {
             grid[i].textContent = "O";
-            grid[i].classList.add("o-mark"); 
+            grid[i].classList.add("o-mark");
         } else {
             grid[i].textContent = "";
         }
@@ -79,12 +80,10 @@ function showBoard() {
     document.getElementById("home-front").style.display = "none";
 }
 
-
-
 function makeMove(index) {
     if (!ongoingGame) return;
     socket.emit("gameMakeMove", index);
-    switchTurn();
+    // switchTurn();
 }
 
 function startGame() {
@@ -99,24 +98,25 @@ function startGame() {
     const hostId = lobby.host;
     const players = lobby.users;
 
-
-    const hostPlayer = players.find(user => user.id === hostId);
-    const otherPlayer = players.find(user => user.id !== hostId);
+    const hostPlayer = players.find((user) => user.id === hostId);
+    const otherPlayer = players.find((user) => user.id !== hostId);
 
     if (!hostPlayer || !otherPlayer) return;
 
     document.querySelector(".player-x").textContent = `${hostPlayer.username} (X)`;
     document.querySelector(".player-o").textContent = `${otherPlayer.username} (O)`;
     document.getElementById("player-1").textContent = `${hostPlayer.username} (X)`;
-        document.getElementById("player-2").textContent = `${otherPlayer.username} (O)`;
+    document.getElementById("player-2").textContent = `${otherPlayer.username} (O)`;
+    xPlayer = hostPlayer.id;
+    yPlayer = otherPlayer.id;
 
-    if (currentUser.id === hostId) {
-        playerSymbol = "X";
-        opponentSymbol = "O";
-    } else {
-        playerSymbol = "O";
-        opponentSymbol = "X";
-    }
+    // if (currentUser.id === hostId) {
+    //     playerSymbol = "X";
+    //     opponentSymbol = "O";
+    // } else {
+    //     playerSymbol = "O";
+    //     opponentSymbol = "X";
+    // }
 }
 
 function endGame(winner) {
@@ -125,22 +125,39 @@ function endGame(winner) {
     // document.getElementById("game-container").style.display = "none";
 }
 
-
-function switchTurn() {
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+function updateGame(payload) {
+    socket.emit("setGameId", payload.gameId);
+    console.log(payload);
+    drawBoard(payload.board);
+    currentTurnId = parseInt(payload.currentTurn);
     updateTurnHighlight();
-
-    
-    const playerColor = currentPlayer === 'X' ? 'rgba(0, 123, 255, 0.6)' : 'rgba(255, 99, 71, 0.6)';
-    socket.emit("updatePlayerTurn", { player: currentPlayer, color: playerColor });
 }
 
-function updateTurnHighlight() {
-    const gameContainer = document.getElementById('game-container');
+// function switchTurn() {
+//     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+//     updateTurnHighlight();
 
-    if (currentPlayer === 'X') {
-        gameContainer.style.boxShadow = '0px 0px 30px 10px rgba(0, 123, 255, 0.6)';
+//     const playerColor = currentPlayer === 'X' ? 'rgba(0, 123, 255, 0.6)' : 'rgba(255, 99, 71, 0.6)';
+//     socket.emit("updatePlayerTurn", { player: currentPlayer, color: playerColor });
+// }
+
+function updateTurnHighlight() {
+    const gameContainer = document.getElementById("game-container");
+    const user = JSON.parse(localStorage.getItem("user"));
+    console.log(user.id, currentTurnId);
+
+    if (currentTurnId === user.id) {
+        const color = getPlayerColor(
+            currentTurnId === xPlayer ? "X" : "O"
+        );
+        console.log(color);
+        gameContainer.style.boxShadow = `0px 0px 30px 10px ${color}`;
     } else {
-        gameContainer.style.boxShadow = '0px 0px 30px 10px rgba(255, 99, 71, 0.6)';
+        gameContainer.style.boxShadow = "none";
     }
+}
+
+function getPlayerColor(player) {
+    console.log("get player color", player);
+    return player === "X" ? "rgba(0, 123, 255, 0.6)" : "rgba(255, 99, 71, 0.6)";
 }
