@@ -1,82 +1,170 @@
 import { Socket } from "socket.io";
 import { LobbyDatabase, LocalLobbyDatabase } from "../modules/Databases.js";
 import { io } from "../config/SocketServer.js";
+import { GameManager, GamesEnum } from "../modules/games/GameManager.js";
+import { Game } from "../modules/games/Game.js";
+
+const gameManager = new GameManager();
 
 export class SocketSession {
     socket: Socket;
     db: LobbyDatabase;
     userID: number | null;
+    lobbyId: string | null;
+    gameId: string | null;
     constructor(socket: Socket) {
         this.socket = socket;
         this.db = new LocalLobbyDatabase();
         this.userID = null;
+        this.lobbyId = null;
+        this.gameId = null;
     }
 
     setUserID(userID: number) {
         this.userID = userID;
     }
 
+    setGameID(gameID: string) {
+        this.gameId = gameID;
+    }
+
+    hasGameId() {
+        return this.gameId != null;
+    }
+
     async createLobby() {
         if (!this.userID) {
-            throw new Error("User not authenticated");
+            throw new Error("User not authenticated in createLobby");
         }
 
         const lobbyId = await this.db.createLobby(this.userID);
         await this.socket.join(lobbyId);
-        console.log(this.socket.rooms);
-        await this.updateLobbyMembers(lobbyId);
+        this.lobbyId = lobbyId;
+        await this.updateLobbyMembers(this.lobbyId);
     }
 
     async joinLobby(lobbyId: string) {
         if (!this.userID) {
-            throw new Error("User not authenticated");
+            throw new Error("User not authenticated in joinLobby");
         }
 
-        await this.leaveAllLobbies();
+        if (this.lobbyId) {
+            await this.leaveLobby();
+        }
+
         await this.db.joinLobby(lobbyId, this.userID);
         await this.socket.join(lobbyId);
-        await this.updateLobbyMembers(lobbyId);
+        this.lobbyId = lobbyId;
+        await this.updateLobbyMembers(this.lobbyId);
     }
 
-    async leaveLobby(lobbyId: string) {
+    async leaveLobby() {
         if (!this.userID) {
-            throw new Error("User not authenticated");
+            throw new Error("User not authenticated in leaveLobby");
         }
 
-        await this.db.leaveLobby(lobbyId, this.userID);
-        await this.socket.leave(lobbyId);
-        await this.updateLobbyMembers(lobbyId);
+        if (!this.lobbyId) {
+            throw new Error("User not in a lobby on leaveLobby");
+        }
+        const prevLobbyId = this.lobbyId;
+
+        await this.db.leaveLobby(this.lobbyId, this.userID);
+        await this.socket.leave(this.lobbyId);
+        this.lobbyId = null
+        await this.updateLobbyMembers(prevLobbyId)
     }
 
-    async updateLobby(lobbyId: string) {
-        const lobby = await this.db.getLobby(lobbyId);
-        io.to(lobbyId).emit("updateLobby", lobby.members);
-    }
-
-    async leaveAllLobbies() {
+    async createGame(gameType: number) {
         if (!this.userID) {
-            throw new Error("User not authenticated");
+            throw new Error("User not authenticated in createGame");
         }
 
-        const lobbyIds = [];
-        for (const room of this.socket.rooms) {
-            if (room !== this.socket.id) {
-                lobbyIds.push(room);
-            }
+        if (!this.lobbyId) {
+            throw new Error("User not in a lobby");
         }
 
-        console.log("Leaving lobbies", lobbyIds);
-
-        for (const lobbyId of lobbyIds) {
-            await this.leaveLobby(lobbyId);
+        if (this.gameId) {
+            throw new Error("Game already created");
         }
+
+        const players = await this.db.getLobbyMembers(this.lobbyId);
+        const gameEnumString = GamesEnum[gameType];
+        const gameEnum = GamesEnum[gameEnumString as keyof typeof GamesEnum];
+
+        this.gameId = gameManager.createGame(
+            gameEnum,
+            this.lobbyId,
+            players.map((p) => p.id.toString())
+        ).gameId;
+        await this.updateGame();
+    }
+
+    async makeMove(index: number) {
+        if (!this.gameId) {
+            throw new Error("can't make a move when no game present");
+        }
+
+        if (!this.userID) {
+            throw new Error("Can't make a move when no userId");
+        }
+
+        const succeed = gameManager.handleMove(
+            this.gameId,
+            this.userID.toString(),
+            index
+        );
+        if (!succeed) {
+            throw new Error("Invalid move");
+        }
+        this.updateGame();
+    }
+
+    async gameOver(winner: string | null) {
+        if (!this.lobbyId) {
+            throw new Error("user not part of a lobby in gameOver");
+        }
+
+        io.to(this.lobbyId).emit("gameOver", winner);
+        this.gameId = null;
     }
 
     private async updateLobbyMembers(lobbyId: string) {
         const lobby = await this.db.getLobby(lobbyId);
-        console.log(lobby);
+        if (!lobby) {
+            return;
+        }
+        const members = await this.db.getLobbyMembers(lobbyId);
         this.db.printLobbies();
 
-        io.to(lobbyId).emit("updateLobby", lobby);
+        const fullLobby = {
+            id: lobby.id,
+            users: members,
+            host: lobby.host,
+        };
+
+        io.to(lobbyId).emit("updateLobby", fullLobby);
+    }
+
+    private async updateGame() {
+        if (!this.gameId) {
+            throw new Error("Game not found");
+        }
+
+        if (!this.lobbyId) {
+            throw new Error("User not in a lobby");
+        }
+
+        const game = gameManager.getGameState(this.gameId);
+        if (!game) {
+            throw new Error("Game not found");
+        }
+
+        io.to(this.lobbyId).emit("updateGame", game);
+
+        if (game.isGameOver()) {
+            const winner = game.getWinner();
+            await this.gameOver(winner);
+            return;
+        }
     }
 }

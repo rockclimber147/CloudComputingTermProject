@@ -1,4 +1,4 @@
-import { Game } from "../GameManager.js";
+import { Game } from "../Game.js";
 
 export class TicTacToeGame extends Game<number> {
     private board: (string | null)[] = Array(9).fill(null);
@@ -32,7 +32,8 @@ export class TicTacToeGame extends Game<number> {
              playerId === this.currentTurn &&
              this.board[move] === null;
     }
-  
+    
+    //TODO: Better information about moves
     applyMove(playerId: string, move: number): void {
       if (!this.validateMove(playerId, move)) {
         throw new Error("Invalid move");

@@ -1,5 +1,7 @@
 import { randomBytes } from "crypto";
 import redis from "../config/RedisStartup.js";
+import { userRepository } from "../config/RepositoryInit.js";
+import { UserBasicInfo } from "../models/User.js";
 
 export abstract class LobbyDatabase {
     constructor() {
@@ -11,7 +13,7 @@ export abstract class LobbyDatabase {
     abstract joinLobby(lobbyId: string, userId: number): Promise<void>;
     abstract leaveLobby(lobbyId: string, userId: number): Promise<void>;
     abstract getLobby(lobbyId: string): Promise<any>;
-    abstract getLobbyMembers(lobbyId: string): Promise<number[]>;
+    abstract getLobbyMembers(lobbyId: string): Promise<UserBasicInfo[]>;
     abstract printLobbies(): void;
 }
 
@@ -36,7 +38,7 @@ export class RedisDatabase extends LobbyDatabase {
         throw new Error("Method not implemented.");
     }
 
-    getLobbyMembers(lobbyId: string): Promise<number[]> {
+    getLobbyMembers(lobbyId: string): Promise<UserBasicInfo[]> {
         throw new Error("Method not implemented.");
     }
 
@@ -74,7 +76,7 @@ export class LocalLobbyDatabase extends LobbyDatabase {
         console.log("Joining lobby", lobbyId, userId);
 
         if (!LocalLobbyDatabase.lobbies.has(lobbyId)) {
-            throw new Error("Lobby does not exist");
+            throw new Error("Lobby does not exist for join");
         }
 
         LocalLobbyDatabase.lobbies.get(lobbyId)?.users.push(userId);
@@ -82,14 +84,12 @@ export class LocalLobbyDatabase extends LobbyDatabase {
 
     async leaveLobby(lobbyId: string, userId: number): Promise<void> {
         console.log("Leaving lobby", lobbyId, userId);
-
-        if (!LocalLobbyDatabase.lobbies.has(lobbyId)) {
-            throw new Error("Lobby does not exist");
-        }
+        
 
         const lobby = LocalLobbyDatabase.lobbies.get(lobbyId);
         if (!lobby) {
-            throw new Error("Lobby does not exist");
+            console.log(lobbyId);
+            throw new Error(`Lobby does not exist for leave ${lobbyId}`);
         }
 
         if (!lobby.users.includes(userId)) {
@@ -112,8 +112,17 @@ export class LocalLobbyDatabase extends LobbyDatabase {
         return LocalLobbyDatabase.lobbies.get(lobbyId);
     }
 
-    async getLobbyMembers(lobbyId: string): Promise<number[]> {
-        return LocalLobbyDatabase.lobbies.get(lobbyId)?.users || [];
+    async getLobbyMembers(lobbyId: string): Promise<UserBasicInfo[]> {
+        const lobby = await this.getLobby(lobbyId);
+        if (!lobby) {
+            throw new Error("Lobby does not exist for getLobbyMembers");
+        }
+
+        const userInfo = await Promise.all(
+            lobby.users.map((id) => userRepository.getUser(id))
+        );
+
+        return userInfo;
     }
 
     printLobbies(): void {
