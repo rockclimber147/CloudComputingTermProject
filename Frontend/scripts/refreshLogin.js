@@ -1,16 +1,18 @@
-export async function refreshLogin(){
+import url from "./url.js";
+
+export async function refreshLogin() {
     const token = localStorage.getItem("token");
     if (!token) {
         return false;
     }
 
-    const result = await fetch("http://localhost:3000/api/auth/verify", {
+    const result = await fetch(`${url}/api/auth/verify`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
         },
-    })
+    });
 
     if (!result.ok) {
         localStorage.removeItem("token");
@@ -23,5 +25,3 @@ export async function refreshLogin(){
     localStorage.setItem("token", data.token);
     return true;
 }
-
-refreshLogin();
