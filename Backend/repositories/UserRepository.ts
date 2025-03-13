@@ -1,7 +1,7 @@
 import { Sequelize, Op } from 'sequelize';
 import { DbContext } from '../config/DbStartup.js'; 
 import { UserBasicInfo } from '../models/User.js';
-import { UserFriendStatusEnum, Friend, UserFriend } from '../models/UserFriend.js';
+import { UserFriendStatusEnum } from '../models/UserFriend.js';
 import { ErrorWithStatusCode } from '../modules/ErrorHandling.js';
 import bcrypt from 'bcryptjs'
 
@@ -133,34 +133,36 @@ class UserRepository {
         const [sentRequests, receivedRequests] = await Promise.all([
             this.context.UserFriend.findAll({
                 where: { senderID: userID },
-                attributes: ['receiverID', 'status', 'dateCreated', 'dateAccepted']
+                attributes: ['senderID', 'receiverID', 'status', 'dateCreated', 'dateAccepted']
             }),
             this.context.UserFriend.findAll({
                 where: { receiverID: userID },
-                attributes: ['senderID', 'status', 'dateCreated', 'dateAccepted']
+                attributes: ['senderID', 'receiverID', 'status', 'dateCreated', 'dateAccepted']
             })
         ]);
 
 
-        const friendIDs = [
-            ...sentRequests.map(req => req.receiverID),
-            ...receivedRequests.map(req => req.senderID)
-        ];
+        // const friendIDs = [
+        //     ...sentRequests.map(req => req.receiverID),
+        //     ...receivedRequests.map(req => req.senderID)
+        // ];
 
-        if (friendIDs.length === 0) return []; 
+        // if (friendIDs.length === 0) return []; 
 
-        const users = await this.context.User.findAll({
-            where: { id: { [Op.in]: friendIDs } }
-        });
+        // const users = await this.context.User.findAll({
+        //     where: { id: { [Op.in]: friendIDs } }
+        // });
 
-        const friends = users.map(user => {
+        // const friends = users.map(user => {
 
-            const userFriend = sentRequests.find(req => req.receiverID === user.id) ||
-                receivedRequests.find(req => req.senderID === user.id);
+        //     const userFriend = sentRequests.find(req => req.receiverID === user.id) ||
+        //         receivedRequests.find(req => req.senderID === user.id);
 
-            return userFriend ? new Friend(user, userFriend) : null;
-        }).filter(friend => friend !== null);
+        //     return userFriend ? new Friend(user, userFriend) : null;
+        // }).filter(friend => friend !== null);
 
+        const friends = [...sentRequests, ...receivedRequests]
+        console.log(friends)
         return friends.sort((a, b) => {
             const aDate = a.dateAccepted ?? a.dateCreated;
             const bDate = b.dateAccepted ?? b.dateCreated;

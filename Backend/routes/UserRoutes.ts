@@ -35,7 +35,8 @@ router.post('/send-friend-request', async (req: AuthRequest, res: Response): Pro
             res.status(400).json({ error: "senderId and receiverId are required." });
             return;
         }
-
+        console.log(senderId)
+        console.log(receiverId)
         const userFriend = await userRepository.sendFriendRequest(senderId, receiverId);
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
