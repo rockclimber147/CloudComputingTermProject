@@ -77,24 +77,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function refreshDropdowns() {
     let loggedInId = JSON.parse(localStorage.getItem("user")).id
-    const [allUsers, friends] = await Promise.all([
+    const [allUsers, allFriendRequests] = await Promise.all([
         fetchUsers(),
         fetchAuth(`${url}/api/users/friends`, "GET")
     ]);
 
     const dbUsers = allUsers.filter(u => u.id != loggedInId)
     const userMap = new Map();
-    allUsers.forEach(user => {
+    dbUsers.forEach(user => {
         userMap.set(user.id, user);  // Use user ID as the key
     });
-    console.log(userMap)
-    const receivedRequests = friends.filter(f => f.receiverId == loggedInId)
-    console.log("Friend requests: ")
-    console.log(friends)
-
+    const receivedRequests = allFriendRequests.filter(f => f.receiverID == loggedInId)
     document.getElementById("friendsDropdown")
     .addEventListener("click", populateFriendsDropdown(
-        friends.filter(u => u.status == "Accepted"),
+        allFriendRequests.filter(u => u.status == "Accepted"),
         userMap
     ));
 
@@ -107,12 +103,12 @@ async function refreshDropdowns() {
 
     document.getElementById("searchInput")
     .addEventListener("input", (event) => {
-        searchUsers(event.target.value, dbUsers, friends);
+        searchUsers(event.target.value, userMap, allFriendRequests);
     });
 
     const query = document.getElementById("searchInput").value.trim();
     if (query) {
-        searchUsers(query, dbUsers, friends);  // Reapply search with updated data
+        searchUsers(query, userMap, allFriendRequests);  // Reapply search with updated data
     }
 }
 
@@ -191,23 +187,7 @@ function populateFriendsDropdown(friends, userMap) {
     }
 
     friends.forEach(friend => {
-        let loggedInId = JSON.parse(localStorage.getItem("user")).id;
-        let send = friend.senderID;  // 4
-        let receive = friend.receiverID;  // 13
-        let userId;
-        
-        console.log('Sender ID:', send); // 4
-        console.log('Receiver ID:', receive); // 13
-        console.log('Logged In ID:', loggedInId); // 13
-        
-        if (send !== loggedInId) {
-            userId = send;  // If the logged-in user is not the sender, use the sender's ID
-        } else {
-            userId = receive;  // Otherwise, use the receiver's ID
-        }
-        
-        console.log('Resolved User ID:', userId);
-        let user = userMap.get(userId)
+        let user = getUserForRequest(userMap, friend)
         console.log(user)
         let friendCard = `
             <li>
@@ -266,14 +246,14 @@ function createButton(text, classNames, clickHandler, disabled = false) {
 }
 
 // Refactored searchUsers function
-function searchUsers(query, users, userFriends) {
+function searchUsers(query, usermap, userFriends) {
     let resultsContainer = document.getElementById("searchResults");
     resultsContainer.style.display = "";
     resultsContainer.innerHTML = ""; // Clear previous results
 
     if (!query.trim()) return; // Don't show results if empty
 
-    let filteredUsers = users.filter(user => user.username.toLowerCase().includes(query.toLowerCase()));
+    let filteredUsers = [...usermap.values()].filter(user => user.username.toLowerCase().includes(query.toLowerCase()));
 
     if (filteredUsers.length === 0) {
         resultsContainer.innerHTML = `<li class="list-group-item text-muted">No users found</li>`;
@@ -287,7 +267,7 @@ function searchUsers(query, users, userFriends) {
         let userInfoDiv = createUserInfoDiv(user.username, user.email);
 
         // Determine button text and enable state
-        let existingFriend = userFriends.find(f => f.id == user.id);
+        let existingFriend = userFriends.find(f => f.senderID == user.id || f.receiverID == user.id);
         let buttonText = "Add Friend";
         let enabled = true;
         if (existingFriend) {
@@ -318,13 +298,14 @@ function populateRequestsDropdown(requests, userMap) {
     }
 
     requests.forEach(request => {
+        let user = getUserForRequest(userMap, request)
+
         let requestCard = document.createElement("li");
         requestCard.classList.add("dropdown-item");
-        let requestUser = userMap[request.senderId]
-        let userInfoDiv = createUserInfoDiv(requestUser.username, requestUser.email);
+        let userInfoDiv = createUserInfoDiv(user.username, user.email);
 
-        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.senderId));
-        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.senderId));
+        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.senderID));
+        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.senderID));
 
         let buttonDiv = document.createElement("div");
         buttonDiv.classList.add("d-flex", "justify-content-end");
@@ -338,9 +319,27 @@ function populateRequestsDropdown(requests, userMap) {
     });
 }
 
+function getUserForRequest(usermap, friend) {
+    let loggedInId = JSON.parse(localStorage.getItem("user")).id;
+    let send = friend.senderID; 
+    let receive = friend.receiverID; 
+    let userId;
+
+    
+    if (send !== loggedInId) {
+        userId = send; 
+    } else {
+        userId = receive;
+    }
+    
+    console.log('Resolved User ID:', userId);
+    return usermap.get(userId)
+}
+
 async function acceptRequest(userId) {
     try {
-        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { receiverId: userId });
+        console.log(userId)
+        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { senderID: userId });
         alert("Friend request accepted!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {
@@ -351,7 +350,7 @@ async function acceptRequest(userId) {
 
 async function rejectRequest(userId) {
     try {
-        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", { receiverId: userId });
+        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", { senderID: userId });
         alert("Friend request declined!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {

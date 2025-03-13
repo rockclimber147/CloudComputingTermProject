@@ -35,8 +35,7 @@ router.post('/send-friend-request', async (req: AuthRequest, res: Response): Pro
             res.status(400).json({ error: "senderId and receiverId are required." });
             return;
         }
-        console.log(senderId)
-        console.log(receiverId)
+
         const userFriend = await userRepository.sendFriendRequest(senderId, receiverId);
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
@@ -47,15 +46,18 @@ router.post('/send-friend-request', async (req: AuthRequest, res: Response): Pro
 
 router.post('/accept-friend-request', async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { receiverId } = req.body;
-        const senderId = req.userID!;
-
-        if (!senderId || !receiverId) {
+        console.log("body")
+        console.log(req.body)
+        const { senderID } = req.body;
+        const receiverID = req.userID!;
+        console.log(senderID)
+        console.log(receiverID)
+        if (!senderID || !receiverID) {
             res.status(400).json({ error: "senderId and receiverId are required." });
             return;
         }
 
-        const userFriend = await userRepository.acceptFriendRequest(senderId, receiverId);
+        const userFriend = await userRepository.acceptFriendRequest(senderID, receiverID);
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
     } catch (error: unknown) {
@@ -65,15 +67,16 @@ router.post('/accept-friend-request', async (req: AuthRequest, res: Response): P
 
 router.post('/reject-friend-request', async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { receiverId } = req.body;
+        const { receiverID } = req.body;
         const senderId = req.userID!;
-
-        if (!senderId || !receiverId) {
-            res.status(400).json({ error: "senderId and receiverId are required." });
+        if (!senderId || !receiverID) {
+            let message = "senderId and receiverId are required."
+            console.error(message)
+            res.status(400).json({ error: message });
             return;
         }
 
-        const userFriend = await userRepository.rejectFriendRequest(senderId, receiverId);
+        const userFriend = await userRepository.rejectFriendRequest(senderId, receiverID);
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
     } catch (error: unknown) {

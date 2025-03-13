@@ -141,28 +141,7 @@ class UserRepository {
             })
         ]);
 
-
-        // const friendIDs = [
-        //     ...sentRequests.map(req => req.receiverID),
-        //     ...receivedRequests.map(req => req.senderID)
-        // ];
-
-        // if (friendIDs.length === 0) return []; 
-
-        // const users = await this.context.User.findAll({
-        //     where: { id: { [Op.in]: friendIDs } }
-        // });
-
-        // const friends = users.map(user => {
-
-        //     const userFriend = sentRequests.find(req => req.receiverID === user.id) ||
-        //         receivedRequests.find(req => req.senderID === user.id);
-
-        //     return userFriend ? new Friend(user, userFriend) : null;
-        // }).filter(friend => friend !== null);
-
         const friends = [...sentRequests, ...receivedRequests]
-        console.log(friends)
         return friends.sort((a, b) => {
             const aDate = a.dateAccepted ?? a.dateCreated;
             const bDate = b.dateAccepted ?? b.dateCreated;
