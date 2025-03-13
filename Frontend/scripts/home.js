@@ -76,10 +76,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function refreshDropdowns() {
-    const [dbUsers, friends] = await Promise.all([
+    const [allUsers, friends] = await Promise.all([
         fetchUsers(),
         fetchAuth(`${url}/api/users/friends`, "GET")
     ]);
+
+    const dbUsers = allUsers.filter(u => u.id != JSON.parse(localStorage.getItem("user")).id)
 
     document.getElementById("friendsDropdown")
     .addEventListener("click", populateFriendsDropdown(
@@ -162,6 +164,7 @@ function refreshLobby() {
 
 async function populateUserWelcome() {
     let currentUser = JSON.parse(localStorage.getItem("user"))
+    console.log(currentUser)
     let header = document.getElementById("welcome")
     header.innerText = `Welcome, ${currentUser.username}`
 }
