@@ -198,12 +198,6 @@ function addFriend(userId) {
     console.log("Adding friend with id: " + userId)
     fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
 }
-
-function acceptFriend(userID) {
-    fetchAuth(`${url}/api/users/accept-friend-request`, "POST", {receiverId: userId})
-    refreshDropdowns()
-}
-
 function searchUsers(query, users, userFriends) {
     let resultsContainer = document.getElementById("searchResults");
     searchResults.style.display = "";
@@ -254,8 +248,9 @@ function searchUsers(query, users, userFriends) {
         let addButton = document.createElement("button");
         addButton.classList.add("btn", "btn-primary", "btn-sm", "flex-shrink-0");
         addButton.textContent = buttonText;  // Set button text
+        addButton.addEventListener("click", () => addFriend(user.id));
         addButton.disabled = !enabled;
-    
+        
         // Append the user info div and button to the userItem
         userItem.appendChild(userInfoDiv);
         userItem.appendChild(addButton);

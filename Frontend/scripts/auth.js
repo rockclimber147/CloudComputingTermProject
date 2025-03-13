@@ -40,7 +40,7 @@ export async function fetchAuth(endpoint, method = "GET", body = null) {
     const response = await fetch(endpoint, options);
 
     if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`error: ${response.error}`);
     }
 
     return response.json();
