@@ -46,11 +46,11 @@ io.on("connection", async (socket: Socket) => {
         }
     });
 
-    socket.on("login", (token: string) => {
+    socket.on("login", async (token: string) => {
         console.log("Login with token", token);
 
         try {
-            const userID = verifyToken(token);
+            const userID = await verifyToken(token);
             socketConnections[socket.id].setUserID(userID);
         } catch (error: any) {
             console.log("Error verifying token", error);

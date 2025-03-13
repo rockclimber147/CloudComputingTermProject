@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
-import redis from "../config/RedisStartup.js";
+import redisService from "../config/RedisStartup.js";
 import { userRepository } from "../config/RepositoryInit.js";
 import { UserBasicInfo } from "../models/User.js";
 
@@ -19,7 +19,7 @@ export abstract class LobbyDatabase {
 
 export class RedisDatabase extends LobbyDatabase {
     connect(): void {
-        redis.connect();
+        redisService.connect();
     }
 
     createLobby(host: number): Promise<string> {

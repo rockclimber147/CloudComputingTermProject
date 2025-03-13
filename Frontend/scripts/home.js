@@ -1,17 +1,13 @@
 import { refreshLogin } from "./refreshLogin.js";
 import socket, { joinLobby } from "./socket.js";
-
+import { logout } from "./auth.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const isLoggedIn = await refreshLogin();
     if (!isLoggedIn) {
         window.location.href = "login.html";
     }
-});
 
-
-
-document.addEventListener("DOMContentLoaded", async () => {
     refreshLobby();
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
@@ -29,6 +25,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     socket.on("updateLobby", () => {
         refreshLobby();
+    });
+
+    console.log("here")
+
+    const logoutLink = document.getElementById("logout")
+    logoutLink?.addEventListener("click", async (event) => {
+        event.preventDefault();
+        console.log("logout clicked")
+        await logout()
     });
 });
 
