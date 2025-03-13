@@ -17,6 +17,10 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="#">TDP Games</a>
+                <div class="d-flex mx-auto position-relative" style="width: 300px;">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by username...">
+                    <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 300px; z-index: 1000;"></ul>
+                </div>
                 <button
                     class="navbar-toggler"
                     type="button"
