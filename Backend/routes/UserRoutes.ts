@@ -62,4 +62,22 @@ router.post('/accept-friend-request', async (req: AuthRequest, res: Response): P
     }
 });
 
+router.post('/reject-friend-request', async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { receiverId } = req.body;
+        const senderId = req.userID!;
+
+        if (!senderId || !receiverId) {
+            res.status(400).json({ error: "senderId and receiverId are required." });
+            return;
+        }
+
+        const userFriend = await userRepository.rejectFriendRequest(senderId, receiverId);
+
+        res.status(201).json({ message: "Friend request sent successfully!", userFriend });
+    } catch (error: unknown) {
+        handleError(res, error)
+    }
+});
+
 export default router;

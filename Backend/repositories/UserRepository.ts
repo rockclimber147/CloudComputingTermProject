@@ -111,6 +111,23 @@ class UserRepository {
         return userFriend;
     }
 
+    async rejectFriendRequest(senderId: number, receiverId: number) {
+        const userFriend = await this.context.UserFriend.findOne({
+            where: {
+                senderID: senderId,
+                receiverID: receiverId,
+                status: UserFriendStatusEnum.Pending,
+            }
+        });
+    
+        if (!userFriend) {
+            throw new ErrorWithStatusCode('Friend request not found or already accepted/rejected.', 404);
+        }
+        userFriend.status = UserFriendStatusEnum.Rejected;
+        await userFriend.save();
+        return userFriend;
+    }
+
     async getFriendsForUser(userID: number) {
 
         const [sentRequests, receivedRequests] = await Promise.all([

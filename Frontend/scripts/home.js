@@ -299,8 +299,8 @@ function populateRequestsDropdown(requests) {
 
         let declineButton = document.createElement("button");
         declineButton.classList.add("btn", "btn-danger", "btn-sm");
-        declineButton.textContent = "Decline";
-        declineButton.addEventListener("click", () => declineRequest(request.id));
+        declineButton.textContent = "Reject";
+        declineButton.addEventListener("click", () => rejectRequest(request.id));
 
         // Create a div to hold the buttons
         let buttonDiv = document.createElement("div");
@@ -328,9 +328,9 @@ async function acceptRequest(userId) {
 }
 
 
-async function declineRequest(userId) {
+async function rejectRequest(userId) {
     try {
-        await fetchAuth(`${url}/api/users/decline-friend-request`, "POST", { receiverId: userId });
+        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", { receiverId: userId });
         alert("Friend request declined!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {
