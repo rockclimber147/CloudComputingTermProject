@@ -198,9 +198,39 @@ function addFriend(userId) {
     console.log("Adding friend with id: " + userId)
     fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
 }
+
+// Helper function to create a user info div
+function createUserInfoDiv(username, email) {
+    let userInfoDiv = document.createElement("div");
+    userInfoDiv.classList.add("d-flex", "flex-column", "text-truncate");
+    
+    let usernameStrong = document.createElement("strong");
+    usernameStrong.textContent = username;
+    userInfoDiv.appendChild(usernameStrong);
+    
+    let userEmailSmall = document.createElement("small");
+    userEmailSmall.classList.add("text-muted");
+    userEmailSmall.textContent = email;
+    userInfoDiv.appendChild(userEmailSmall);
+
+    return userInfoDiv;
+}
+
+// Helper function to create a button
+function createButton(text, classNames, clickHandler, disabled = false) {
+    let button = document.createElement("button");
+    button.classList.add("btn", "btn-sm", ...classNames);
+    button.textContent = text;
+    button.addEventListener("click", clickHandler);
+    button.disabled = disabled;
+
+    return button;
+}
+
+// Refactored searchUsers function
 function searchUsers(query, users, userFriends) {
     let resultsContainer = document.getElementById("searchResults");
-    searchResults.style.display = "";
+    resultsContainer.style.display = "";
     resultsContainer.innerHTML = ""; // Clear previous results
 
     if (!query.trim()) return; // Don't show results if empty
@@ -215,51 +245,31 @@ function searchUsers(query, users, userFriends) {
     filteredUsers.forEach(user => {
         let userItem = document.createElement("li");
         userItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-    
-        // Create the container for user info
-        let userInfoDiv = document.createElement("div");
-        userInfoDiv.classList.add("d-flex", "flex-column", "text-truncate");
-        userInfoDiv.style.maxWidth = "200px";  // Apply max-width dynamically
-    
-        // Create and append username
-        let usernameStrong = document.createElement("strong");
-        usernameStrong.textContent = user.username;  // Set the username
-        userInfoDiv.appendChild(usernameStrong);
-    
-        // Create and append email
-        let userEmailSmall = document.createElement("small");
-        userEmailSmall.classList.add("text-muted");
-        userEmailSmall.textContent = user.email;  // Set the email
-        userInfoDiv.appendChild(userEmailSmall);
-        
+
+        let userInfoDiv = createUserInfoDiv(user.username, user.email);
+
+        // Determine button text and enable state
         let existingFriend = userFriends.find(f => f.id == user.id);
         let buttonText = "Add Friend";
         let enabled = true;
         if (existingFriend) {
             enabled = false;
             if (existingFriend.status === "Accepted") {
-                buttonText = "Friends";  // User is already a friend
+                buttonText = "Friends";
             } else if (existingFriend.status === "Pending") {
-                buttonText = "Pending";  // Friend request is pending
+                buttonText = "Pending";
             }
         }
-    
-        // Create the Add button
-        let addButton = document.createElement("button");
-        addButton.classList.add("btn", "btn-primary", "btn-sm", "flex-shrink-0");
-        addButton.textContent = buttonText;  // Set button text
-        addButton.addEventListener("click", () => addFriend(user.id));
-        addButton.disabled = !enabled;
-        
-        // Append the user info div and button to the userItem
+
+        let addButton = createButton(buttonText, ["btn-primary", "flex-shrink-0"], () => addFriend(user.id), !enabled);
+
         userItem.appendChild(userInfoDiv);
         userItem.appendChild(addButton);
-    
-        // Append the user item to the results container
         resultsContainer.appendChild(userItem);
     });
 }
 
+// Refactored populateRequestsDropdown function
 function populateRequestsDropdown(requests) {
     let dropdown = document.getElementById("requestsList");
     dropdown.innerHTML = ""; // Clear existing content
@@ -273,41 +283,19 @@ function populateRequestsDropdown(requests) {
         let requestCard = document.createElement("li");
         requestCard.classList.add("dropdown-item");
 
-        // Create user info
-        let userInfoDiv = document.createElement("div");
-        userInfoDiv.classList.add("d-flex", "flex-column", "text-truncate");
+        let userInfoDiv = createUserInfoDiv(request.username, request.email);
 
-        let usernameStrong = document.createElement("strong");
-        usernameStrong.textContent = request.username;
-        userInfoDiv.appendChild(usernameStrong);
+        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.id));
+        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.id));
 
-        let emailSmall = document.createElement("small");
-        emailSmall.classList.add("text-muted");
-        emailSmall.textContent = request.email;
-        userInfoDiv.appendChild(emailSmall);
-
-        // Create Accept and Decline buttons
-        let acceptButton = document.createElement("button");
-        acceptButton.classList.add("btn", "btn-success", "btn-sm", "mr-2");
-        acceptButton.textContent = "Accept";
-        acceptButton.addEventListener("click", () => acceptRequest(request.id));
-
-        let declineButton = document.createElement("button");
-        declineButton.classList.add("btn", "btn-danger", "btn-sm");
-        declineButton.textContent = "Reject";
-        declineButton.addEventListener("click", () => rejectRequest(request.id));
-
-        // Create a div to hold the buttons
         let buttonDiv = document.createElement("div");
         buttonDiv.classList.add("d-flex", "justify-content-end");
         buttonDiv.appendChild(acceptButton);
         buttonDiv.appendChild(declineButton);
 
-        // Add everything to the request card
         requestCard.appendChild(userInfoDiv);
         requestCard.appendChild(buttonDiv);
 
-        // Append the request card to the dropdown
         dropdown.appendChild(requestCard);
     });
 }
