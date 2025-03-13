@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
 
-
     joinLobbyButton.addEventListener("click", (event) => {
         event.preventDefault();
         const lobbyId = document.getElementById("lobby-id-input").value;
@@ -74,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     await refreshDropdowns()
-    });
+});
 
 async function refreshDropdowns() {
     const [dbUsers, friends] = await Promise.all([
@@ -86,6 +85,12 @@ async function refreshDropdowns() {
     .addEventListener("click", populateFriendsDropdown(
         friends.filter(u => u.status == "Accepted")
     ));
+
+    document.getElementById("requestsDropdown")
+    .addEventListener("click", () => populateRequestsDropdown(
+        friends.filter(u => u.status == "Pending")
+    ));
+
 
     document.getElementById("searchInput")
     .addEventListener("input", (event) => {
@@ -193,6 +198,12 @@ function addFriend(userId) {
     console.log("Adding friend with id: " + userId)
     fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
 }
+
+function acceptFriend(userID) {
+    fetchAuth(`${url}/api/users/accept-friend-request`, "POST", {receiverId: userId})
+    refreshDropdowns()
+}
+
 function searchUsers(query, users, userFriends) {
     let resultsContainer = document.getElementById("searchResults");
     searchResults.style.display = "";
@@ -252,4 +263,77 @@ function searchUsers(query, users, userFriends) {
         // Append the user item to the results container
         resultsContainer.appendChild(userItem);
     });
+}
+
+function populateRequestsDropdown(requests) {
+    let dropdown = document.getElementById("requestsList");
+    dropdown.innerHTML = ""; // Clear existing content
+
+    if (requests.length === 0) {
+        dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No pending requests</span></li>`;
+        return;
+    }
+
+    requests.forEach(request => {
+        let requestCard = document.createElement("li");
+        requestCard.classList.add("dropdown-item");
+
+        // Create user info
+        let userInfoDiv = document.createElement("div");
+        userInfoDiv.classList.add("d-flex", "flex-column", "text-truncate");
+
+        let usernameStrong = document.createElement("strong");
+        usernameStrong.textContent = request.username;
+        userInfoDiv.appendChild(usernameStrong);
+
+        let emailSmall = document.createElement("small");
+        emailSmall.classList.add("text-muted");
+        emailSmall.textContent = request.email;
+        userInfoDiv.appendChild(emailSmall);
+
+        // Create Accept and Decline buttons
+        let acceptButton = document.createElement("button");
+        acceptButton.classList.add("btn", "btn-success", "btn-sm", "mr-2");
+        acceptButton.textContent = "Accept";
+        acceptButton.addEventListener("click", () => acceptRequest(request.id));
+
+        let declineButton = document.createElement("button");
+        declineButton.classList.add("btn", "btn-danger", "btn-sm");
+        declineButton.textContent = "Decline";
+        declineButton.addEventListener("click", () => declineRequest(request.id));
+
+        // Create a div to hold the buttons
+        let buttonDiv = document.createElement("div");
+        buttonDiv.classList.add("d-flex", "justify-content-end");
+        buttonDiv.appendChild(acceptButton);
+        buttonDiv.appendChild(declineButton);
+
+        // Add everything to the request card
+        requestCard.appendChild(userInfoDiv);
+        requestCard.appendChild(buttonDiv);
+
+        // Append the request card to the dropdown
+        dropdown.appendChild(requestCard);
+    });
+}
+
+async function acceptRequest(userId) {
+    try {
+        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { receiverId: userId });
+        alert("Friend request accepted!");
+        refreshDropdowns(); // Refresh the dropdowns to update the status
+    } catch (error) {
+        console.error("Error accepting friend request:", error);
+    }
+}
+
+
+async function declineRequest(userId) {
+    try {
+        await fetchAuth(`${url}/api/users/decline-friend-request`, "POST", { receiverId: userId });
+        alert("Friend request declined!");
+        refreshDropdowns(); // Refresh the dropdowns to update the status
+    } catch (error) {
+        console.error("Error declining friend request:", error);
+    }
 }

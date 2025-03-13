@@ -30,9 +30,20 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Friends</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="friendsDropdown" role="button" data-bs-toggle="dropdown">
+                                Friends
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" id="friendsList">
+                                <li><span class="dropdown-item-text text-muted">Loading...</span></li>
+                            </ul>
                         </li>
+                        <a class="nav-link dropdown-toggle" href="#" id="requestsDropdown" role="button" data-bs-toggle="dropdown">
+                            Friend Requests
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="requestsDropdown" id="requestsList">
+                            <!-- Friend requests will be dynamically populated here -->
+                        </ul>
                         <li class="nav-item"><a class="nav-link" href="#">Games</a></li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" id="logout">Logout</a>
