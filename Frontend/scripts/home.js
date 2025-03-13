@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     refreshLobby();
+    populateUserWelcome()
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
@@ -123,4 +124,8 @@ function refreshLobby() {
     refreshLobbyID();
 }
 
-
+async function populateUserWelcome() {
+    let currentUser = JSON.parse(localStorage.getItem("user"))
+    let header = document.getElementById("welcome")
+    header.innerText = `Welcome, ${currentUser.username}`
+}
