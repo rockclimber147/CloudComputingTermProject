@@ -76,21 +76,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function refreshDropdowns() {
+    let loggedInId = JSON.parse(localStorage.getItem("user")).id
     const [allUsers, friends] = await Promise.all([
         fetchUsers(),
         fetchAuth(`${url}/api/users/friends`, "GET")
     ]);
 
-    const dbUsers = allUsers.filter(u => u.id != JSON.parse(localStorage.getItem("user")).id)
+    const dbUsers = allUsers.filter(u => u.id != loggedInId)
+    const userMap = new Map();
+    allUsers.forEach(user => {
+        userMap.set(user.id, user);  // Use user ID as the key
+    });
+    console.log(userMap)
+    const receivedRequests = friends.filter(f => f.receiverId == loggedInId)
+    console.log("Friend requests: ")
+    console.log(friends)
 
     document.getElementById("friendsDropdown")
     .addEventListener("click", populateFriendsDropdown(
-        friends.filter(u => u.status == "Accepted")
+        friends.filter(u => u.status == "Accepted"),
+        userMap
     ));
 
     document.getElementById("requestsDropdown")
     .addEventListener("click", () => populateRequestsDropdown(
-        friends.filter(u => u.status == "Pending")
+        receivedRequests.filter(u => u.status == "Pending"),
+        userMap
     ));
 
 
@@ -169,17 +180,35 @@ async function populateUserWelcome() {
     header.innerText = `Welcome, ${currentUser.username}`
 }
 
-function populateFriendsDropdown(users) {
-    console.log(users)
+function populateFriendsDropdown(friends, userMap) {
+    console.log(friends)
     let dropdown = document.getElementById("friendsList");
     dropdown.innerHTML = ""; // Clear existing content
 
-    if (users.length === 0) {
+    if (friends.length === 0) {
         dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No friends found</span></li>`;
         return;
     }
 
-    users.forEach(user => {
+    friends.forEach(friend => {
+        let loggedInId = JSON.parse(localStorage.getItem("user")).id;
+        let send = friend.senderID;  // 4
+        let receive = friend.receiverID;  // 13
+        let userId;
+        
+        console.log('Sender ID:', send); // 4
+        console.log('Receiver ID:', receive); // 13
+        console.log('Logged In ID:', loggedInId); // 13
+        
+        if (send !== loggedInId) {
+            userId = send;  // If the logged-in user is not the sender, use the sender's ID
+        } else {
+            userId = receive;  // Otherwise, use the receiver's ID
+        }
+        
+        console.log('Resolved User ID:', userId);
+        let user = userMap.get(userId)
+        console.log(user)
         let friendCard = `
             <li>
                 <div class="dropdown-item">
@@ -279,7 +308,7 @@ function searchUsers(query, users, userFriends) {
 }
 
 // Refactored populateRequestsDropdown function
-function populateRequestsDropdown(requests) {
+function populateRequestsDropdown(requests, userMap) {
     let dropdown = document.getElementById("requestsList");
     dropdown.innerHTML = ""; // Clear existing content
 
@@ -291,11 +320,11 @@ function populateRequestsDropdown(requests) {
     requests.forEach(request => {
         let requestCard = document.createElement("li");
         requestCard.classList.add("dropdown-item");
+        let requestUser = userMap[request.senderId]
+        let userInfoDiv = createUserInfoDiv(requestUser.username, requestUser.email);
 
-        let userInfoDiv = createUserInfoDiv(request.username, request.email);
-
-        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.id));
-        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.id));
+        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.senderId));
+        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.senderId));
 
         let buttonDiv = document.createElement("div");
         buttonDiv.classList.add("d-flex", "justify-content-end");
