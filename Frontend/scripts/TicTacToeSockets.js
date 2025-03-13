@@ -125,6 +125,7 @@ function endGame(winnerID) {
         players.find((user) => user.id === winnerID)?.username || "nobody";
     alert(`${winnerUsername} won the game`);
     ongoingGame = false;
+    socket.emit("unsetGameId");
     showLobby();
 }
 

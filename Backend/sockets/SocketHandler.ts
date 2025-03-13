@@ -38,7 +38,7 @@ io.on("connection", async (socket: Socket) => {
         console.log("Leave lobby request", socket.id);
         try {
             await socketConnections[socket.id].leaveLobby();
-            await socketConnections[socket.id].createLobby()
+            await socketConnections[socket.id].createLobby();
         } catch (error: any) {
             console.log("error leaving lobby", error);
             socket.emit("error", error.message);
@@ -64,6 +64,11 @@ io.on("connection", async (socket: Socket) => {
             console.log("setting game id", gameId);
             socketConnections[socket.id].setGameID(gameId);
         }
+    });
+
+    socket.on("unsetGameId", async () => {
+        console.log("unsetGameId");
+        socketConnections[socket.id].unsetGameID();
     });
 
     socket.on("startGame", async (gameType: number) => {

@@ -28,6 +28,10 @@ export class SocketSession {
         this.gameId = gameID;
     }
 
+    unsetGameID() {
+        this.gameId = null;
+    }
+
     hasGameId() {
         return this.gameId != null;
     }
@@ -84,7 +88,7 @@ export class SocketSession {
         }
 
         if (this.gameId) {
-            throw new Error("Game already created");
+            throw new Error(`Game already created, ${this.gameId}`);
         }
 
         const players = await this.db.getLobbyMembers(this.lobbyId);
@@ -125,7 +129,7 @@ export class SocketSession {
         }
 
         io.to(this.lobbyId).emit("gameOver", winner);
-        this.gameId = null;
+        this.unsetGameID();
     }
 
     private async updateLobbyMembers(lobbyId: string) {
