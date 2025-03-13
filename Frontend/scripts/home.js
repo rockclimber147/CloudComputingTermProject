@@ -82,6 +82,11 @@ async function refreshDropdowns() {
         fetchAuth(`${url}/api/users/friends`, "GET")
     ]);
 
+    document.getElementById("friendsDropdown")
+    .addEventListener("click", populateFriendsDropdown(
+        friends.filter(u => u.status == "Accepted")
+    ));
+
     document.getElementById("searchInput")
     .addEventListener("input", (event) => {
         searchUsers(event.target.value, dbUsers, friends);
@@ -150,6 +155,40 @@ async function populateUserWelcome() {
     let header = document.getElementById("welcome")
     header.innerText = `Welcome, ${currentUser.username}`
 }
+
+function populateFriendsDropdown(users) {
+    console.log(users)
+    let dropdown = document.getElementById("friendsList");
+    dropdown.innerHTML = ""; // Clear existing content
+
+    if (users.length === 0) {
+        dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No friends found</span></li>`;
+        return;
+    }
+
+    users.forEach(user => {
+        let friendCard = `
+            <li>
+                <div class="dropdown-item">
+                    <strong>${user.username}</strong><br>
+                    <small class="text-muted">${user.email}</small>
+                </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+        `;
+        dropdown.innerHTML += friendCard;
+    });
+}
+
+async function fetchUsers() {
+    try {
+        const response = await fetchAuth(`${url}/api/users`, "GET");
+        return response;
+    } catch (error) {
+        console.error("Error fetching users:", error);
+    }
+}
+
 function addFriend(userId) {
     console.log("Adding friend with id: " + userId)
     fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
