@@ -1,7 +1,7 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { userRepository } from "../config/RepositoryInit.js";
 import { handleError } from "../modules/ErrorHandling.js";
-import { createToken, verifyToken } from "../modules/JwtUtils.js";
+import { blacklistToken, createToken, verifyToken } from "../modules/JwtUtils.js";
 
 const router = express.Router();
 
@@ -35,9 +35,9 @@ router.post("/create", async (req: Request, res: Response): Promise<void> => {
 
 router.post("/logout", async (req: Request, res: Response): Promise<void> => {
     try {
-        const { userID } = req.body;
-        const user = await userRepository.logoutUser(userID);
-        res.status(200).json(user);
+        const token = req.headers.authorization?.split(" ")[1];
+        if (token) await blacklistToken(token)
+        res.status(200).json("User logged out successfully");
     } catch (error: unknown) {
         handleError(res, error);
     }
@@ -50,7 +50,7 @@ router.post("/verify", async (req: Request, res: Response): Promise<void> => {
             throw new Error("No token provided");
         }
 
-        const userID = verifyToken(token);
+        const userID = await verifyToken(token);
         const user = await userRepository.getUser(userID);
         const newToken = createToken(user.id);
         res.status(200).json({ user, token: newToken });
@@ -58,5 +58,27 @@ router.post("/verify", async (req: Request, res: Response): Promise<void> => {
         handleError(res, error);
     }
 });
+
+export interface AuthRequest extends Request {
+    userID?: number;
+}
+
+export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized: No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = await verifyToken(token)
+        req.userID = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ error: "Unauthorized: Invalid token" });
+    }
+}
 
 export default router;
