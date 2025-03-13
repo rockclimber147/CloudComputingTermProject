@@ -96,6 +96,11 @@ async function refreshDropdowns() {
     .addEventListener("input", (event) => {
         searchUsers(event.target.value, dbUsers, friends);
     });
+
+    const query = document.getElementById("searchInput").value.trim();
+    if (query) {
+        searchUsers(query, dbUsers, friends);  // Reapply search with updated data
+    }
 }
 
 function getLobbyUsers() {
@@ -194,9 +199,10 @@ async function fetchUsers() {
     }
 }
 
-function addFriend(userId) {
+async function addFriend(userId) {
     console.log("Adding friend with id: " + userId)
-    fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
+    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
+    refreshDropdowns();
 }
 
 // Helper function to create a user info div
