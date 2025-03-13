@@ -1,19 +1,9 @@
 import socket from "./socket.js";
 
-const TicTacToeEvent = {
-    START_GAME: "start game",
-    MAKE_MOVE: "make move",
-    UPDATE_BOARD: "update board",
-    GAME_OVER: "game over",
-    ERROR: "error",
-};
-
 let ongoingGame = false;
 let currentTurnId;
 let xPlayer;
 let yPlayer;
-
-// maybe do like a prefered on each side and they have their own letter
 
 document.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("game-front");
@@ -28,10 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
         updateGame(payload);
     });
 
-    socket.on("gameOver", (winner) => {
-        const winnerStr = winner || "Nobody";
-
-        endGame(winnerStr);
+    socket.on("gameOver", (winnerStr) => {
+        let winnerId;
+        if (winnerStr !== null) {
+            winnerId = parseInt(winnerStr);
+        } else {
+            winnerId = null;
+        }
+        endGame(winnerId);
     });
 
     for (let index = 0; index < grid.length; index++) {
@@ -80,7 +74,7 @@ function showBoard() {
     document.getElementById("home-front").style.display = "none";
 }
 
-function showLobby(){
+function showLobby() {
     document.getElementById("game-front").style.display = "none";
     document.getElementById("home-front").style.display = "block";
 }
@@ -108,15 +102,13 @@ function startGame() {
 
     if (!hostPlayer || !otherPlayer) return;
 
-       
     const isHost = currentUser.id === hostPlayer.id;
 
-        
     if (isHost) {
         document.querySelector(".player-x").textContent = `You (X)`;
         document.querySelector(".player-o").textContent = `${otherPlayer.username} (O)`;
     } else {
-         document.querySelector(".player-x").textContent = `${hostPlayer.username} (X)`;
+        document.querySelector(".player-x").textContent = `${hostPlayer.username} (X)`;
         document.querySelector(".player-o").textContent = `You (O)`;
     }
 
@@ -124,11 +116,14 @@ function startGame() {
     document.getElementById("player-2").textContent = `${otherPlayer.username} (O)`;
     xPlayer = hostPlayer.id;
     yPlayer = otherPlayer.id;
-
 }
 
-function endGame(winner) {
-    alert(`${winner} won the game`);
+function endGame(winnerID) {
+    const players = getPlayerInfo();
+
+    const winnerUsername =
+        players.find((user) => user.id === winnerID)?.username || "nobody";
+    alert(`${winnerUsername} won the game`);
     ongoingGame = false;
     showLobby();
 }
@@ -141,16 +136,13 @@ function updateGame(payload) {
     updateTurnHighlight();
 }
 
-
 function updateTurnHighlight() {
     const gameContainer = document.getElementById("game-container");
     const user = JSON.parse(localStorage.getItem("user"));
     console.log(user.id, currentTurnId);
 
     if (currentTurnId === user.id) {
-        const color = getPlayerColor(
-            currentTurnId === xPlayer ? "X" : "O"
-        );
+        const color = getPlayerColor(currentTurnId === xPlayer ? "X" : "O");
         console.log(color);
         gameContainer.style.boxShadow = `0px 0px 30px 10px ${color}`;
     } else {
@@ -161,4 +153,8 @@ function updateTurnHighlight() {
 function getPlayerColor(player) {
     console.log("get player color", player);
     return player === "X" ? "rgba(0, 123, 255, 0.6)" : "rgba(255, 99, 71, 0.6)";
+}
+
+function getPlayerInfo() {
+    return JSON.parse(localStorage.getItem("lobby")).users;
 }
