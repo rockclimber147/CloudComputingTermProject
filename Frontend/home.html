@@ -17,29 +17,47 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="#">TDP Games</a>
-                <button
-                    class="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav">
+        
+                <!-- Centered search bar (with flexbox) -->
+                <div class="d-flex justify-content-center mx-auto position-relative" style="max-width: 300px; flex-grow: 1;">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by username...">
+                    <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 300px; z-index: 1000; top: 100%; left: 0;">
+                    </ul>
+                </div>
+        
+                <!-- Navbar toggler for mobile screens -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+        
+                <!-- Navbar links (collapsed on small screens) -->
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Friends</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="friendsDropdown" role="button" data-bs-toggle="dropdown">
+                                Friends
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" id="friendsList">
+                                <li><span class="dropdown-item-text text-muted">Loading...</span></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="requestsDropdown" role="button" data-bs-toggle="dropdown">
+                                Friend Requests
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="requestsDropdown" id="requestsList">
+                                <li><span class="dropdown-item-text text-muted">Loading...</span></li>
+                            </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="#">Games</a></li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" id="logout">Logout</a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" href="#" id="logout">Logout</a></li>
                     </ul>
                 </div>
             </div>
-        </nav>
+        </nav>        
 
         <div id="home-front" class="container mt-5">
-            <h2>Welcome, User!</h2>
+            <h2 id="welcome">Welcome, User!</h2>
             <p class="lead">Join a lobby or invite friends to play.</p>
 
             <!-- Current Lobby -->
