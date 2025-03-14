@@ -155,6 +155,10 @@ html, body{
     z-index: 1;
 }
 
+#lobby-info{
+    margin-top: 30px;
+}
+
 /* Make the search container responsive */
 .search-container {
     position: absolute;
