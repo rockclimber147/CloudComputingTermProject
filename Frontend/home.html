@@ -18,12 +18,6 @@
             <div class="container">
                 <a class="navbar-brand" href="#">TDP Games</a>
         
-                <!-- Centered search bar (with flexbox) -->
-                <div class="d-flex justify-content-center mx-auto position-relative" style="max-width: 300px; flex-grow: 1;">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search by username...">
-                    <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 300px; z-index: 1000; top: 100%; left: 0;">
-                    </ul>
-                </div>
         
                 <!-- Navbar toggler for mobile screens -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -57,6 +51,14 @@
         </nav>        
 
         <div id="home-front" class="container mt-5">
+            
+            <div class="search-container" style="max-width: 300px; flex-grow: 1; top: 0; right: 0;">
+                <p class="text-center mb-2" style="font-size: 16px; font-weight: bold;">Add a friend!</p>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by username...">
+                <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 290px; z-index: 1000; top: 100%; right: 10px;">
+                </ul>
+            </div>
+
             <h2 id="welcome">Welcome, User!</h2>
             <p class="lead">Join a lobby or invite friends to play.</p>
 
@@ -93,7 +95,6 @@
                     <br>
                 <div class="d-flex justify-content-center mt-3">
                     <button class="btn btn-success fw-bold" id="join-lobby-btn">Join Lobby</button>
-
                 </div>
             </div>
         </div>
