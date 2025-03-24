@@ -45,6 +45,27 @@ const UserRole = initializeUserRoleModel(sequelize, User)
 User.belongsToMany(Role, { through: UserRole, foreignKey: 'userId' });
 Role.belongsToMany(User, { through: UserRole, foreignKey: 'roleId' });
 
+User.hasMany(UserFriend, {
+  foreignKey: 'senderID',
+  onDelete: 'CASCADE',
+  hooks: true, 
+});
+
+User.hasMany(UserFriend, {
+  foreignKey: 'receiverID',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+
+UserFriend.belongsTo(User, {
+  foreignKey: 'senderID',
+  onDelete: 'CASCADE',
+});
+
+UserFriend.belongsTo(User, {
+  foreignKey: 'receiverID',
+  onDelete: 'CASCADE',
+});
 
 class DbContext {
     public User: typeof User;
