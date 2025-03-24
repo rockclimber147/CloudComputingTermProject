@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
-import { User } from '../config/DbStartup.js'; 
+import { User } from '../models/User.js'; 
 
 enum UserFriendStatusEnum {
     Pending = "Pending",
@@ -82,4 +82,7 @@ export const initializeUserFriendModel = (sequelize: Sequelize, UserModel: typeo
   return UserFriend;
 };
 
-export { UserFriendStatusEnum }
+export { 
+  UserFriend,
+  UserFriendStatusEnum,
+ }

@@ -23,7 +23,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 }
 
 // Function to initialize the User model with sequelize
-export const initializeUserModel = (sequelize: Sequelize): typeof User => {
+const initializeUserModel = (sequelize: Sequelize): typeof User => {
   User.init(
     {
       id: {
@@ -53,3 +53,21 @@ export const initializeUserModel = (sequelize: Sequelize): typeof User => {
   );
   return User;
 };
+
+class UserBasicInfo {
+    id: number;
+    username: string;
+    email: string;
+
+    constructor (user: User) {
+      this.id = user.id;
+      this.username = user.username;
+      this.email = user.email;
+    }
+}
+
+export {
+    User,
+    initializeUserModel,
+    UserBasicInfo
+}
