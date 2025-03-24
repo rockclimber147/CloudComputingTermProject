@@ -357,3 +357,19 @@ async function rejectRequest(userId) {
         console.error("Error declining friend request:", error);
     }
 }
+
+
+const toggleButton = document.getElementById('friend-panel-toggle');
+const friendPanel = document.getElementById('friend-panel');
+
+
+toggleButton.addEventListener('click', () => {
+    const isVisible = friendPanel.style.display === 'block';
+    friendPanel.style.display = isVisible ? 'none' : 'block';
+
+});
+
+document.getElementById('close-friend-panel').addEventListener('click', () => {
+    document.getElementById('friend-panel').style.display = 'none';
+});
+
