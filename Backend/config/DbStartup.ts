@@ -32,29 +32,64 @@ const UserFriend = initializeUserFriendModel(sequelize, User);
 import { initializeUserNotificationModel } from "../models/UserNotification.js";
 import { initializeGameResultsModel } from "../models/GameResults.js";
 import { initializeGameResultsUserModel } from "../models/GameResultsUser.js";
+import { initializeRoleModel } from "../models/Role.js";
+import { initializeUserRoleModel } from "../models/UserRole.js";
 
 const UserNotification = initializeUserNotificationModel(sequelize, User);
 const GameResults = initializeGameResultsModel(sequelize, User);
 const GameResultsUser = initializeGameResultsUserModel(sequelize, User);
+const Role = initializeRoleModel(sequelize);
+const UserRole = initializeUserRoleModel(sequelize, User)
 
+
+User.belongsToMany(Role, { through: UserRole, foreignKey: 'userId' });
+Role.belongsToMany(User, { through: UserRole, foreignKey: 'roleId' });
+
+User.hasMany(UserFriend, {
+  foreignKey: 'senderID',
+  onDelete: 'CASCADE',
+  hooks: true, 
+});
+
+User.hasMany(UserFriend, {
+  foreignKey: 'receiverID',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+
+UserFriend.belongsTo(User, {
+  foreignKey: 'senderID',
+  onDelete: 'CASCADE',
+});
+
+UserFriend.belongsTo(User, {
+  foreignKey: 'receiverID',
+  onDelete: 'CASCADE',
+});
 
 class DbContext {
     public User: typeof User;
     public UserFriend: typeof UserFriend;
+    public UserRole: typeof UserRole
     public UserNotification: typeof UserNotification;
     public GameResults: typeof GameResults;
     public GameResultsUser: typeof GameResultsUser;
+    public Role: typeof Role
   
     constructor() {
       this.User = User;
       this.UserFriend = UserFriend;
+      this.UserRole = UserRole
       this.UserNotification = UserNotification;
       this.GameResults = GameResults;
       this.GameResultsUser = GameResultsUser;
+      this.Role = Role
     }
 }
 
 const context: DbContext = new DbContext();
+
+sequelize.sync({ force: false });
 
 export { 
     connectToSQLDB,
