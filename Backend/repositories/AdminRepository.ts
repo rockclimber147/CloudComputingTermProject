@@ -31,6 +31,22 @@ class AdminRepository {
 
         return message;
     }
+
+    async deleteUser(userID: number): Promise<string> {
+        let message: string;
+    
+        const result = await this.context.User.destroy({
+            where: { id: userID }
+        });
+    
+        if (result === 0) {
+            message = `User with ID ${userID} not found.`;
+        } else {
+            message = `User with ID ${userID} successfully deleted.`;
+        }
+    
+        return message;
+    }
 }
 
 export { AdminRepository }
