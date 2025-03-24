@@ -59,6 +59,6 @@ export async function fetchAdmin(endpoint, method = "GET", body = null) {
         return res
     } catch (error) {
         console.error("Error verifying admin status:", error);
-        // window.location.href = "home.html";
+        window.location.href = "home.html";
     }
 }
