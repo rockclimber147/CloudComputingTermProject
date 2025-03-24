@@ -1,5 +1,7 @@
 import { DbContext } from '../config/DbStartup.js'; 
 import { RoleIdEnum } from '../models/Role.js';
+import { UserWithRoles } from '../models/User.js';
+
 
 class AdminRepository {
 
@@ -46,6 +48,19 @@ class AdminRepository {
         }
     
         return message;
+    }
+
+    async getUsersWithRoles() {
+        const [users, roles] = await Promise.all([
+            this.context.User.findAll(),
+            this.context.UserRole.findAll()
+        ]);
+
+        const userMap: Map<number, UserWithRoles> = new Map
+        users.forEach(user => userMap.set(user.id, new UserWithRoles(user, [])))
+        roles.forEach(role => userMap.get(role.userId)?.roles.push(role.roleId))
+        const result: UserWithRoles[] = Array.from(userMap.values());
+        return result;
     }
 }
 

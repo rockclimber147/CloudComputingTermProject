@@ -5,6 +5,15 @@ import { handleError } from "../modules/ErrorHandling.js";
 
 const router = express.Router();
 
+router.get("/users", async (req: Request, res: Response): Promise<void> => {
+    try {
+        const users = await adminRepository.getUsersWithRoles();
+        res.status(200).json({ users: users });
+    } catch (error: unknown) {
+        handleError(res, error);
+    }
+});
+
 router.post("/promote", async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId } = req.body;
@@ -27,7 +36,6 @@ router.post("/delete", async (req: Request, res: Response): Promise<void> => {
 
 export async function adminMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
     if (await adminRepository.userIsAdmin(req.userID!)) {
-        console.log("User is admin")
         next();
     } else {
         return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
