@@ -1,5 +1,9 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
+enum RoleIdEnum {
+    ADMIN = 1
+}
+
 interface RoleAttributes {
   id: number;
   roleType: string;
@@ -32,4 +36,4 @@ const initializeRoleModel = (sequelize: Sequelize): typeof Role => {
   return Role;
 };
 
-export { Role, initializeRoleModel };
+export { Role, initializeRoleModel, RoleIdEnum };

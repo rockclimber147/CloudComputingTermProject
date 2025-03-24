@@ -42,6 +42,10 @@ const Role = initializeRoleModel(sequelize);
 const UserRole = initializeUserRoleModel(sequelize, User)
 
 
+User.belongsToMany(Role, { through: UserRole, foreignKey: 'userId' });
+Role.belongsToMany(User, { through: UserRole, foreignKey: 'roleId' });
+
+
 class DbContext {
     public User: typeof User;
     public UserFriend: typeof UserFriend;
