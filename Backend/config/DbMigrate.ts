@@ -5,7 +5,7 @@ import { context, sequelize } from './DbStartup.js';
 async function setupDatabase(): Promise<void> {
     try {
         // Sync the database (ensure tables exist without dropping them)
-        await sequelize.sync({ force: false });
+        await sequelize.sync({ alter: true });
 
         // Check if users already exist
         const userCount: number = await context.User.count();
