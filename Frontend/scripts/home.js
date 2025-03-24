@@ -1,6 +1,6 @@
 import { refreshLogin } from "./refreshLogin.js";
 import socket, { joinLobby } from "./socket.js";
-import { logout, fetchAuth } from "./auth.js";
+import { logout, fetchAuth, adminRolesEnum } from "./auth.js";
 import url from "./url.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     refreshLobby();
     populateUserWelcome()
+    addAdminButton()
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
@@ -57,12 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         refreshLobby();
     });
 
-    console.log("here")
-
     const logoutLink = document.getElementById("logout")
     logoutLink?.addEventListener("click", async (event) => {
         event.preventDefault();
-        console.log("logout clicked")
         await logout()
     });
 
@@ -171,13 +169,11 @@ function refreshLobby() {
 
 async function populateUserWelcome() {
     let currentUser = JSON.parse(localStorage.getItem("user"))
-    console.log(currentUser)
     let header = document.getElementById("welcome")
     header.innerText = `Welcome, ${currentUser.username}`
 }
 
 function populateFriendsDropdown(friends, userMap) {
-    console.log(friends)
     let dropdown = document.getElementById("friendsList");
     dropdown.innerHTML = ""; // Clear existing content
 
@@ -188,7 +184,6 @@ function populateFriendsDropdown(friends, userMap) {
 
     friends.forEach(friend => {
         let user = getUserForRequest(userMap, friend)
-        console.log(user)
         let friendCard = `
             <li>
                 <div class="dropdown-item">
@@ -212,7 +207,6 @@ async function fetchUsers() {
 }
 
 async function addFriend(userId) {
-    console.log("Adding friend with id: " + userId)
     await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
     refreshDropdowns();
 }
@@ -332,13 +326,11 @@ function getUserForRequest(usermap, friend) {
         userId = receive;
     }
     
-    console.log('Resolved User ID:', userId);
     return usermap.get(userId)
 }
 
 async function acceptRequest(userId) {
     try {
-        console.log(userId)
         await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { senderID: userId });
         alert("Friend request accepted!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
@@ -355,5 +347,19 @@ async function rejectRequest(userId) {
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {
         console.error("Error declining friend request:", error);
+    }
+}
+
+async function addAdminButton() {
+    const user = localStorage.getItem("user");
+    console.log(user)
+
+    let userIsAdmin = JSON.parse(user).roles.find(role => role == adminRolesEnum.ADMIN)
+
+    if (userIsAdmin) {
+        const adminNavItem = document.createElement("li");
+        adminNavItem.classList.add("nav-item");
+        adminNavItem.innerHTML = `<a class="nav-link text-warning" href="admin.html">Admin Console</a>`;
+        document.getElementById("adminConsoleLink").replaceWith(adminNavItem);
     }
 }
