@@ -10,11 +10,25 @@
     font-weight: 500; 
 }
 
-html, body{
-    height: 120vh;
+html, body {
+    height:100%;
+    margin: 0;
 }
+
 #home-front{
     position: relative;
+    padding-bottom: 100px;
+}
+
+#home-front {
+    position: relative;
+    min-height: calc(100vh - 100px); 
+    display: flex;
+    flex-direction: column;
+}
+#game-front {
+    padding-bottom: 500px; 
+    height: 800px;
 }
 
 .lead{
@@ -78,7 +92,7 @@ html, body{
     top: 73%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
+    margin-bottom: 50px;
 }
 
 /* Player Info */
@@ -115,31 +129,28 @@ html, body{
 }
 
 /* Lobby */
-.card {
-    border-radius: 10px;
-    padding: 20px;
+
+#joinLobbyForm .form-control {
+    height: auto; /* Adjust input height if needed */
+}
+
+#lobbyForm{
+    height: 343px;
+    
 }
 
 
-#enter-lobby-form {
+#lobby-id-input{
     margin-top: 20px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    
 }
 
-#lobby-id-input {
-    margin-top: 10px;
+#lobbyButton{
+    padding-top: 20px;
 }
 
 .form-label {
     font-weight: bold;
-}
-
-
-#join-lobby-btn {
-    width: 50%;
-    margin-top: 10px;
 }
 
 
@@ -155,9 +166,7 @@ html, body{
     z-index: 1;
 }
 
-#lobby-info{
-    margin-top: 30px;
-}
+
 
 /* Make the search container responsive */
 .search-container {
@@ -179,14 +188,14 @@ html, body{
 
 
 #searchInput {
-    width: 95%; 
+    width: 95%;
 }
 
 #searchResults {
     width: 100%; /* Matches input width */
     margin-top: 5px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    z-index: 2000;
     position: absolute;
 }
 
@@ -223,6 +232,12 @@ html, body{
     font-size: 1.5rem;
     transition: all 0.3s ease;
     border: none;
+    position: fixed;
+    bottom: 20px; 
+    right: 20px; 
+    z-index: 1050;
+    width: 60px;
+    height: 60px;
 }
 
 #friend-panel-toggle:hover {
@@ -234,6 +249,15 @@ html, body{
     border-radius: 15px;
     overflow: hidden; /* Ensures header and body are perfectly aligned */
     padding: 0;
+    z-index:1;
+    position: fixed;
+     bottom: 90px; 
+     right: 20px; 
+     width: 300px; 
+     max-height: 800px; 
+     overflow-y: auto; 
+     z-index: 1050; 
+     display: none;
 }
 
 #friend-panel .card-header {
@@ -257,4 +281,19 @@ html, body{
 
 #friend-panel .btn-sm {
     font-size: 0.75rem;
+}
+
+/*Footer*/
+footer {
+    font-family: Arial, sans-serif;
+    margin-top: auto;
+    position: relative;
+}
+
+footer a {
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }
