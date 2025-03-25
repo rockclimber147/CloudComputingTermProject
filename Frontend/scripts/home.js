@@ -1,6 +1,7 @@
 import { refreshLogin } from "./refreshLogin.js";
 import socket, { joinLobby } from "./socket.js";
 import { logout, fetchAuth } from "./auth.js";
+import { acceptRequest, rejectRequest } from "./friendRequest.js";
 import url from "./url.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -334,26 +335,4 @@ function getUserForRequest(usermap, friend) {
     
     console.log('Resolved User ID:', userId);
     return usermap.get(userId)
-}
-
-async function acceptRequest(userId) {
-    try {
-        console.log(userId)
-        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { senderID: userId });
-        alert("Friend request accepted!");
-        refreshDropdowns(); // Refresh the dropdowns to update the status
-    } catch (error) {
-        console.error("Error accepting friend request:", error);
-    }
-}
-
-
-async function rejectRequest(userId) {
-    try {
-        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", { senderID: userId });
-        alert("Friend request declined!");
-        refreshDropdowns(); // Refresh the dropdowns to update the status
-    } catch (error) {
-        console.error("Error declining friend request:", error);
-    }
 }

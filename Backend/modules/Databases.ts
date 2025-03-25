@@ -15,6 +15,7 @@ export abstract class LobbyDatabase {
     abstract getLobby(lobbyId: string): Promise<any>;
     abstract getLobbyMembers(lobbyId: string): Promise<UserBasicInfo[]>;
     abstract printLobbies(): void;
+    abstract isUserOnline(userID: number): Promise<boolean>;
 }
 
 export class RedisDatabase extends LobbyDatabase {
@@ -43,6 +44,10 @@ export class RedisDatabase extends LobbyDatabase {
     }
 
     printLobbies(): void {
+        throw new Error("Method not implemented.");
+    }
+
+    isUserOnline(userID: number): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
 }
@@ -84,7 +89,6 @@ export class LocalLobbyDatabase extends LobbyDatabase {
 
     async leaveLobby(lobbyId: string, userId: number): Promise<void> {
         console.log("Leaving lobby", lobbyId, userId);
-        
 
         const lobby = LocalLobbyDatabase.lobbies.get(lobbyId);
         if (!lobby) {
@@ -127,6 +131,16 @@ export class LocalLobbyDatabase extends LobbyDatabase {
 
     printLobbies(): void {
         console.log(LocalLobbyDatabase.lobbies);
+    }
+
+    async isUserOnline(userID: number): Promise<boolean> {
+        console.log("isUserOnline", this.getLobbies());
+        for (const lobby of this.getLobbies().values()) {
+            if (lobby.users.includes(userID)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private getLobbies(): Map<string, { id: string; users: number[]; host: number }> {

@@ -3,7 +3,7 @@ import { io } from "../config/SocketServer.js";
 import { SocketSession } from "./SocketSession.js";
 import { verifyToken } from "../modules/JwtUtils.js";
 
-const socketConnections: { [key: string]: SocketSession } = {};
+export const socketConnections: { [key: string]: SocketSession } = {};
 
 io.on("connection", async (socket: Socket) => {
     console.log("A user connected:", socket.id);

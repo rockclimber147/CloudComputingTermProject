@@ -22,6 +22,8 @@ export class SocketSession {
 
     setUserID(userID: number) {
         this.userID = userID;
+        // have the user join a room with their own userID
+        this.socket.join(userID.toString());
     }
 
     setGameID(gameID: string) {

@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { userRepository } from "../config/RepositoryInit.js";
 import { handleError } from '../modules/ErrorHandling.js';
 import { AuthRequest } from './AuthRoutes.js';
-
+import { Notification } from '../modules/Notification.js';
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ router.get("/friends", async (req: AuthRequest, res: Response): Promise<void> =>
 
 router.post('/send-friend-request', async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { receiverId } = req.body;
+        const receiverId: number = req.body.receiverId;
         const senderId = req.userID!;
 
         if (!senderId || !receiverId) {
@@ -37,6 +37,7 @@ router.post('/send-friend-request', async (req: AuthRequest, res: Response): Pro
         }
 
         const userFriend = await userRepository.sendFriendRequest(senderId, receiverId);
+        Notification.sendFriendRequestNotification(senderId, receiverId);
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
     } catch (error: unknown) {
