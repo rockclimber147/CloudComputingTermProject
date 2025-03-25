@@ -12,6 +12,7 @@ export class SocketSession {
     userID: number | null;
     lobbyId: string | null;
     gameId: string | null;
+    private gameLoopInterval: NodeJS.Timeout | null = null;
     constructor(socket: Socket) {
         this.socket = socket;
         this.db = new LocalLobbyDatabase();
@@ -101,6 +102,46 @@ export class SocketSession {
             players.map((p) => p.id.toString())
         ).gameId;
         await this.updateGame();
+
+        if (gameEnum === GamesEnum.PONG) {
+            this.startGameLoop();
+        }
+    }
+
+    private startGameLoop() {
+        if (!this.gameId || !this.lobbyId) return;
+
+        console.log("Starting game loop for Pong...");
+
+        // Run every 50ms (~20 updates per second)
+        this.gameLoopInterval = setInterval(async () => {
+            try {
+                const game = gameManager.getGameState(this.gameId!);
+                if (!game) {
+                    console.error("Game state not found.");
+                    this.stopGameLoop();
+                    return;
+                }
+                game.update()
+                io.to(this.lobbyId!).emit("updateGame", game);
+
+                if (game.isGameOver()) {
+                    console.log("Game over detected, stopping loop.");
+                    this.stopGameLoop();
+                    await this.gameOver(game.getWinner());
+                }
+            } catch (error) {
+                console.error("Error in game loop:", error);
+            }
+        }, 50);
+    }
+
+    private stopGameLoop() {
+        if (this.gameLoopInterval) {
+            clearInterval(this.gameLoopInterval);
+            this.gameLoopInterval = null;
+            console.log("Game loop stopped.");
+        }
     }
 
     async makeMove(index: number) {
@@ -130,6 +171,7 @@ export class SocketSession {
 
         io.to(this.lobbyId).emit("gameOver", winner);
         this.unsetGameID();
+        this.stopGameLoop(); 
     }
 
     private async updateLobbyMembers(lobbyId: string) {
