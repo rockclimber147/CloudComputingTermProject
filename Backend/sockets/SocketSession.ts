@@ -79,6 +79,13 @@ export class SocketSession {
         await this.updateLobbyMembers(prevLobbyId)
     }
 
+    async emitGameType(game: number) {
+        if (!this.lobbyId) {
+            throw new Error("no lobby exists");
+        }
+        io.to(this.lobbyId).emit("setGame", game);
+    }
+
     async createGame(gameType: number) {
         if (!this.userID) {
             throw new Error("User not authenticated in createGame");

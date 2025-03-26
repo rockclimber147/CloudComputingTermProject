@@ -73,8 +73,10 @@ io.on("connection", async (socket: Socket) => {
 
     socket.on("startGame", async (gameType: number) => {
         console.log("Game start request", gameType);
+        
         try {
             // Create a game
+            await socketConnections[socket.id].emitGameType(gameType)
             await socketConnections[socket.id].createGame(gameType);
             console.log("Game created");
         } catch (error: any) {
