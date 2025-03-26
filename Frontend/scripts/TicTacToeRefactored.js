@@ -29,6 +29,7 @@ export class TicTacToeHandler {
         this.oPlayer = null;
         this.cellClickHandler = this.handleCellClick.bind(this); 
         this.setupSocketEvents()
+        this.gameIdSet = false
     }
 
     setupUI() {
@@ -40,7 +41,6 @@ export class TicTacToeHandler {
 
     handleCellClick(event) {
         const index = event.target.dataset.index;
-        console.log("CLICK");
         if (!this.game.ongoingGame) return;
         socket.emit("gameMakeMove", index);
     }
@@ -137,7 +137,10 @@ export class TicTacToeHandler {
     }
 
     updateGame(payload) {
-        socket.emit("setGameId", payload.gameId);
+        if (!this.gameIdSet) {
+            console.log("setting game id")
+            socket.emit("setGameId", payload.gameId);
+        }
         this.drawBoard(payload.board);
         this.currentTurnId = parseInt(payload.currentTurn);
         this.updateTurnHighlight();

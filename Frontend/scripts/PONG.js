@@ -12,6 +12,7 @@ export class PONG {
         this.BALL_SIZE = 3;
         
         this.gameState = null; // Will hold backend game state
+        this.gameIdSet = false
     }
 
     updateGameState(state) {
@@ -54,6 +55,11 @@ export class PONGHandler {
             if (this.ongoingGame == false) {
                 this.startGame();
             }
+            if (!this.gameIdSet) {
+                console.log("setting game id")
+                socket.emit("setGameId", payload.gameId);
+            }
+            
             this.pongGame.updateGameState(payload);
         });
 
