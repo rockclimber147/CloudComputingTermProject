@@ -21,20 +21,20 @@ export class PONG {
 
     draw() {
         if (!this.gameState) return;
+        console.log(this.gameState);
         
         const { ballPosition, playerStateMap } = this.gameState;
-        const players = Array.from(playerStateMap.values());
-
+        const players = Object.values(playerStateMap);
+    
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        let scaleX = this.canvas.width / this.GAME_WIDTH;
-        let scaleY = this.canvas.height / this.GAME_HEIGHT;
-
+    
+        const scaleX = this.canvas.width / this.GAME_WIDTH;
+        const scaleY = this.canvas.height / this.GAME_HEIGHT;
+    
         players.forEach((player, index) => {
             let paddleY = index === 0 ? 5 : this.canvas.height - this.PADDLE_HEIGHT - 5;
             this.ctx.fillRect(player.paddlePosition.x * scaleX, paddleY, this.PADDLE_WIDTH * scaleX, this.PADDLE_HEIGHT);
         });
-
         this.ctx.beginPath();
         this.ctx.arc(ballPosition.x * scaleX, ballPosition.y * scaleY, this.BALL_SIZE, 0, Math.PI * 2);
         this.ctx.fill();
@@ -71,13 +71,10 @@ export class PONGHandler {
         document.getElementById("home-front").style.display = "none";
         document.getElementById("PONG-front").style.display = "block";
         this.ongoingGame = true
-        this.gameLoop = setInterval(() => {
-            this.pongGame.draw()
-        }, 50)
     }
 
     makeMove(index) {
-        if (!ongoingGame) return;
+        if (!this.ongoingGame) return;
         socket.emit("gameMakeMove", index);
     }
 

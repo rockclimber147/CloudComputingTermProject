@@ -32,18 +32,21 @@ export class PONGGame extends Game<number> {
 
     ballPosition = new Vector(50, 50)
     ballVelocity = new Vector(5, 5)
-    playerStateMap: Map<string, PlayerState> = new Map()
+    playerStateMap: { [key: string]: PlayerState } = {};
 
     constructor(gameId: string, players: string[]) {
         super(gameId, players);
+        console.log("in PONGGame constructor")
+        console.log(players)
         for (let i = 0; i < players.length; i++) {
-            this.playerStateMap.set(players[i], new PlayerState(PONGGame.GAME_WIDTH * i))
+            this.playerStateMap[players[i]] = new PlayerState(PONGGame.GAME_WIDTH * i)
         }
-      }
+        console.log(this.playerStateMap)
+    }
 
     isGameOver(): boolean {
         this.players.forEach(player => {
-            let playerScore = this.playerStateMap.get(player)?.score
+            let playerScore = this.playerStateMap[player]?.score
             if (!!playerScore && playerScore >= PONGGame.SCORE_TO_WIN) return true
         })
         return false;
@@ -51,7 +54,7 @@ export class PONGGame extends Game<number> {
     
     getWinner(): string | null {
         this.players.forEach(player => {
-            let playerScore = this.playerStateMap.get(player)?.score
+            let playerScore = this.playerStateMap[player]?.score
             if (!!playerScore && playerScore >= PONGGame.SCORE_TO_WIN) return player
         })
         return null;
@@ -67,7 +70,7 @@ export class PONGGame extends Game<number> {
         if (!this.validateMove(playerId, move)) {
             throw new Error("Invalid move");
         }
-        let playerState = this.playerStateMap.get(playerId)
+        let playerState = this.playerStateMap[playerId]
         if (!playerState) return
         playerState.paddlePosition.x += move * PONGGame.PADDLE_MOVE_SPEED
         playerState.paddlePosition.x = Math.max(0, Math.min(PONGGame.GAME_WIDTH, playerState.paddlePosition.x))
@@ -82,8 +85,8 @@ export class PONGGame extends Game<number> {
         }
     
         let ballX = this.ballPosition.x;
-        let topPlayer = this.playerStateMap.get(this.players[0])!;
-        let bottomPlayer = this.playerStateMap.get(this.players[1])!;
+        let topPlayer = this.playerStateMap[this.players[0]]!;
+        let bottomPlayer = this.playerStateMap[this.players[1]]!;
     
         if (this.ballPosition.y <= PONGGame.PADDLE_OFFSET) {
             if (
