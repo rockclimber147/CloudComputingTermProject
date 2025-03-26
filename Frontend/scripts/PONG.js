@@ -43,9 +43,10 @@ export class PONG {
 
 export class PONGHandler {
     constructor(canvasID) {
-        pongGame = new PONG(canvasID)
-        ongoingGame = false;
-        this.initializeSocketInteractions
+        this.pongGame = new PONG(canvasID)
+        this.ongoingGame = false;
+        this.initializeSocketInteractions()
+        this.gameLoop = null
     }
 
     initializeSocketInteractions() {
@@ -56,10 +57,41 @@ export class PONGHandler {
             this.pongGame.updateGameState(payload);
         });
 
-
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "a" || event.key === "A") {
+                this.makeMove(-1)
+            } else if (event.key === "d" || event.key === "D") {
+                this.makeMove(1)
+            }
+        });
     }
     
     startGame() {
+        document.getElementById("game-front").style.display = "none";
+        document.getElementById("home-front").style.display = "none";
+        document.getElementById("PONG-front").style.display = "block";
         this.ongoingGame = true
+        this.gameLoop = setInterval(() => {
+            this.pongGame.draw()
+        }, 50)
+    }
+
+    makeMove(index) {
+        if (!ongoingGame) return;
+        socket.emit("gameMakeMove", index);
+    }
+
+    endGame(winnerID) {
+        const players = getPlayerInfo();
+    
+        const winnerUsername =
+            players.find((user) => user.id === winnerID)?.username || "nobody";
+        alert(`${winnerUsername} won the game`);
+        ongoingGame = false;
+        socket.emit("unsetGameId");
+        clearInterval(this.gameLoop);
+        document.getElementById("game-front").style.display = "none";
+        document.getElementById("home-front").style.display = "block";
+        document.getElementById("PONG-front").style.display = "none";
     }
 }
