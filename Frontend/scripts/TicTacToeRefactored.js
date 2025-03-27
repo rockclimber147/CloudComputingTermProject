@@ -1,5 +1,98 @@
 import socket from "./socket.js";
 
+class TicTacToeUI {
+    constructor() {
+        this.container = null;
+        this.gameGrid = null;
+        this.gameCells = [];
+        this.playerX = null; // Instance variable for Player 1 (X)
+        this.playerO = null; // Instance variable for Player 2 (O)
+    }
+
+    // Initialize the UI elements
+    initialize() {
+        // Create container
+        this.container = document.createElement('div');
+        this.container.id = "tic-tac-toe-ui";
+
+        // Create header
+        const header = document.createElement('h2');
+        header.textContent = "Tic-Tac-Toe";
+        
+        // Create player information
+        const playerInfo = document.createElement('p');
+        playerInfo.classList.add('lead');
+        playerInfo.innerHTML = `<span id="player-1">Player 1 (X)</span> vs <span id="player-2">Player 2 (O)</span>`;
+
+        // Create the game container
+        const gameContainer = document.createElement('div');
+        gameContainer.classList.add('row');
+        gameContainer.innerHTML = `
+            <div class="col-md-6 offset-md-3">
+                <div id="game-container" class="game-container">
+                    <!-- Player divs will be added here dynamically -->
+                    <div class="game-grid" id="game-grid">
+                        <!-- Cells will be inserted dynamically -->
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Initialize player-x and player-o divs as instance variables
+        this.playerX = document.createElement('h1');
+        this.playerX.classList.add('player-x');
+        this.playerX.textContent = 'Player 1 (X)';
+
+        this.playerO = document.createElement('h1');
+        this.playerO.classList.add('player-o');
+        this.playerO.textContent = 'Player 2 (O)';
+
+        // Get the game grid container and append player divs and cells
+        const gameContainerElem = gameContainer.querySelector('.game-container');
+        gameContainerElem.insertBefore(this.playerX, gameContainerElem.querySelector('.game-grid'));
+        gameContainerElem.appendChild(this.playerO);
+
+        // Assign the game grid div
+        this.gameGrid = gameContainer.querySelector('#game-grid');
+
+        // Create the game cells
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('game-cell');
+            cell.dataset.index = i;
+            this.gameCells.push(cell);
+            this.gameGrid.appendChild(cell);
+        }
+
+        // Append everything to the container
+        this.container.appendChild(header);
+        this.container.appendChild(playerInfo);
+        this.container.appendChild(gameContainer);
+    }
+
+    // Inject the UI into the target element in the DOM
+    inject(targetSelector) {
+        const target = document.getElementById(targetSelector);
+        if (target) {
+            target.appendChild(this.container);
+        } else {
+            console.error(`Inject failed: No element found with selector '${targetSelector}'`);
+        }
+    }
+
+    // Destroy the UI and remove all elements
+    destroy() {
+        if (this.container) {
+            this.container.remove();
+            this.container = null;
+            this.gameGrid = null;
+            this.gameCells = [];
+            this.playerX = null;
+            this.playerO = null;
+        }
+    }
+}
+
 class TicTacToeGame {
     constructor() {
         this.board = Array(9).fill(null);
@@ -30,10 +123,11 @@ export class TicTacToeHandler {
         this.cellClickHandler = this.handleCellClick.bind(this); 
         this.setupSocketEvents()
         this.gameIdSet = false
+        this.ui = new TicTacToeUI()
     }
 
     setupUI() {
-        const cells = document.querySelectorAll(".game-cell");
+        const cells = this.ui.gameCells;
         cells.forEach((cell) => {
             cell.addEventListener("click", this.cellClickHandler);
         });
@@ -59,13 +153,20 @@ export class TicTacToeHandler {
         });
     }
 
+    tearDownSocketEvents() {
+        socket.off("updateGame");
+        socket.off("gameOver");
+    }
+
     startGame() {
+        this.ui.initialize()
+        this.ui.inject("game-front")
         this.setupUI()
         this.game.ongoingGame = true;
         document.getElementById("game-front").style.display = "block";
         document.getElementById("home-front").style.display = "none";
-        document.getElementById("PONG-front").style.display = "none";
         this.assignPlayers();
+        
     }
 
     assignPlayers() {
@@ -83,8 +184,8 @@ export class TicTacToeHandler {
         this.yPlayer = otherPlayer.id
 
         const isHost = currentUser.id === this.xPlayer;
-        document.querySelector(".player-x").textContent = isHost ? `You (X)` : `${hostPlayer.username} (X)`;
-        document.querySelector(".player-o").textContent = isHost ? `${otherPlayer.username} (O)` : `You (O)`;
+        this.ui.playerX.textContent = isHost ? `You (X)` : `${hostPlayer.username} (X)`;
+        this.ui.playerO.textContent = isHost ? `${otherPlayer.username} (O)` : `You (O)`;
     }
 
     endGame(winnerID) {
@@ -95,45 +196,19 @@ export class TicTacToeHandler {
         socket.emit("unsetGameId");
         document.getElementById("game-front").style.display = "none";
         document.getElementById("home-front").style.display = "block";
-        document.getElementById("PONG-front").style.display = "none";
         this.tearDown()
     }
 
     tearDown() {
         console.log("Tearing down TicTacToeHandler...");
-
-        // Remove event listeners from each cell
-        const cells = document.querySelectorAll(".game-cell");
-        cells.forEach((cell) => {
-            cell.removeEventListener("click", this.cellClickHandler); // Properly remove listener
-        });
-
-        // Completely remove and reset the game grid
-        const gameGrid = document.getElementById("game-grid");
-        gameGrid.innerHTML = ""; // Clears the grid
-
-        // Recreate the empty game cells
-        for (let i = 0; i < 9; i++) {
-            const cell = document.createElement("div");
-            cell.classList.add("game-cell");
-            cell.dataset.index = i;
-            gameGrid.appendChild(cell);
-        }
-    
-        // socket.off("updateGame");
-        // socket.off("gameOver");
+        this.ui.destroy()
+        this.tearDownSocketEvents()
     }
 
     destroy() {
         console.log("Destroying TicTacToeHandler...");
-
-        // Remove event listeners from game cells
         this.tearDown()
-        // Remove WebSocket listeners
-        socket.off("updateGame", this.updateGame);
-        socket.off("gameOver", this.endGame);
-
-        // Reset UI (optional)
+        this.tearDownSocketEvents()
     }
 
     updateGame(payload) {
@@ -147,7 +222,9 @@ export class TicTacToeHandler {
     }
 
     drawBoard(board) {
-        const grid = document.getElementById("game-grid").children;
+        const grid = this.ui.gameCells;
+        console.log("in draw board")
+        console.log(grid)
         const lobby = JSON.parse(localStorage.getItem("lobby"));
     
         if (!lobby || lobby.users.length !== 2) return;
@@ -174,7 +251,7 @@ export class TicTacToeHandler {
     }
 
     updateTurnHighlight() {
-        const gameContainer = document.getElementById("game-container");
+        const gameContainer = this.ui.container;
         const user = JSON.parse(localStorage.getItem("user"));
         gameContainer.style.boxShadow = this.currentTurnId === user.id ? `0px 0px 30px 10px ${this.getPlayerColor()}` : "none";
     }
