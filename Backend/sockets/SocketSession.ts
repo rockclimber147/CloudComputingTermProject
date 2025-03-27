@@ -172,13 +172,13 @@ export class SocketSession {
     }
 
     async gameOver(winner: string | null) {
+        this.stopGameLoop();
         if (!this.lobbyId) {
             throw new Error("user not part of a lobby in gameOver");
         }
-
+        console.log("Game over with winner: " + winner)
         io.to(this.lobbyId).emit("gameOver", winner);
         this.unsetGameID();
-        this.stopGameLoop(); 
     }
 
     private async updateLobbyMembers(lobbyId: string) {

@@ -101,6 +101,7 @@ io.on("connection", async (socket: Socket) => {
     socket.on("disconnect", async () => {
         try {
             console.log(`User ${socket.id} disconnected`);
+            await socketConnections[socket.id].gameOver(null)
             await socketConnections[socket.id].leaveLobby();
             delete socketConnections[socket.id];
         } catch (error: any) {
