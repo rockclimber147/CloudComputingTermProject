@@ -25,10 +25,12 @@ class PlayerState {
 
 export class PONGGame extends Game<number> {
     static readonly PADDLE_MOVE_SPEED = 3
-    static readonly SCORE_TO_WIN = 5
+    static readonly SCORE_TO_WIN = 10
     static readonly GAME_WIDTH = 100
     static readonly PADDLE_WIDTH = 15
     static readonly PADDLE_OFFSET = 5;
+    static readonly BALL_MIN_VELOCITY = 3
+    static readonly BALL_MAX_VELOCITY = 5
 
     ballPosition = new Vector(50, 50)
     ballVelocity = new Vector(5, 5)
@@ -45,18 +47,24 @@ export class PONGGame extends Game<number> {
     }
 
     isGameOver(): boolean {
-        this.players.forEach(player => {
-            let playerScore = this.playerStateMap[player]?.score
-            if (!!playerScore && playerScore >= PONGGame.SCORE_TO_WIN) return true
-        })
+        for (const player of this.players) {
+            let playerScore = this.playerStateMap[player]?.score;   
+            if (playerScore !== undefined && playerScore >= PONGGame.SCORE_TO_WIN) {
+                return true;
+            }
+        }
+    
         return false;
     }
     
     getWinner(): string | null {
-        this.players.forEach(player => {
-            let playerScore = this.playerStateMap[player]?.score
-            if (!!playerScore && playerScore >= PONGGame.SCORE_TO_WIN) return player
-        })
+        for (const player of this.players) {
+            let playerScore = this.playerStateMap[player]?.score;   
+            if (playerScore !== undefined && playerScore >= PONGGame.SCORE_TO_WIN) {
+                return player;
+            }
+        }
+    
         return null;
     }
     
@@ -116,18 +124,28 @@ export class PONGGame extends Game<number> {
     }
 
     reflectBallY() {
-        this.ballVelocity.y *= -1
+        this.ballVelocity.y *= -1;
+        this.ballVelocity.x = this.getRandomBallVelocity();
     }
     
     resetBall() {
-        this.ballPosition = new Vector(50, 50);
+        this.ballPosition = new Vector(
+            PONGGame.GAME_WIDTH / 2,
+             PONGGame.GAME_WIDTH / 2);
         
-        // Ensure the ball has a decent speed
-        let speed = 2 + Math.random() * 2;  
-        let angle = (Math.random() * Math.PI) / 2 - Math.PI / 4; // Random angle between -45 and 45 degrees
         this.ballVelocity = new Vector(
-            speed * Math.sign(Math.random() - 0.5),
-            speed * Math.sin(angle)
+            this.getRandomBallVelocity(),
+            this.getRandomBallVelocity()
         );
+    }
+
+    getRandomPositiveBallVelocity(): number {
+        return Math.random() * (PONGGame.BALL_MAX_VELOCITY - PONGGame.BALL_MIN_VELOCITY) + PONGGame.BALL_MIN_VELOCITY;
+    }
+
+    getRandomBallVelocity(): number {
+        return Math.random() < 0.5 
+            ? this.getRandomPositiveBallVelocity() 
+            : -1 * this.getRandomPositiveBallVelocity();
     }
 }
