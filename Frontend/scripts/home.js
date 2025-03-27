@@ -2,6 +2,8 @@ import { refreshLogin } from "./refreshLogin.js";
 import socket, { joinLobby } from "./socket.js";
 import { logout, fetchAuth, adminRolesEnum } from "./auth.js";
 import url from "./url.js";
+import { TicTacToeHandler } from "./TicTacToeRefactored.js";
+import { PONGHandler } from "./PONG.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const isLoggedIn = await refreshLogin();
@@ -9,9 +11,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html";
     }
 
+    let currentGame;
+
+    socket.on("setGame", (game) => {
+        console.log("in setGame")
+        console.log(game)
+
+        if (currentGame) {
+            currentGame.destroy();
+            currentGame = null; // Clear reference
+        }
+
+        if (game == 0){
+            console.log("Tic tac toe init")
+            currentGame = new TicTacToeHandler()
+        }
+        else if (game == 1){
+            console.log("PONG init")
+            currentGame = new PONGHandler("PONG-Canvas")
+        }
+        currentGame.startGame()
+    })
+
     refreshLobby();
     populateUserWelcome()
     addAdminButton()
+
+    let selectedGameId = 0; // Default to Tic Tac Toe
+    
+
+    document.getElementById("game-selection").addEventListener("change", (event) => {
+        selectedGameId = parseInt(event.target.value, 10);
+        console.log("Selected game ID:", selectedGameId);
+    });
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
@@ -50,8 +82,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Only the host can start the game");
             return;
         }
-
-        socket.emit("startGame", 0);
+        console.log("Starting game")
+        console.log(selectedGameId)
+        socket.emit("startGame", selectedGameId);
+        console.log(currentGame)
     });
 
     socket.on("updateLobby", () => {

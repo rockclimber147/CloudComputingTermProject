@@ -41,4 +41,8 @@ export class TicTacToeGame extends Game<number> {
       this.board[move] = playerId;
       this.currentTurn = this.players.find(p => p !== playerId)!;
     }
+
+    update() {
+      // not used for tic tac toe
+    }
   }
