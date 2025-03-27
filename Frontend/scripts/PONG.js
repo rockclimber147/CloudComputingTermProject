@@ -47,7 +47,6 @@ export class PONGHandler {
         this.pongGame = new PONG(canvasID)
         this.ongoingGame = false;
         this.initializeSocketInteractions()
-        this.gameLoop = null
     }
 
     initializeSocketInteractions() {
@@ -68,13 +67,15 @@ export class PONGHandler {
             this.endGame(winner)
         })
 
-        window.addEventListener("keydown", (event) => {
+        this.handleKeydown = (event) => {
             if (event.key === "a" || event.key === "A") {
-                this.makeMove(-1)
+                this.makeMove(-1);
             } else if (event.key === "d" || event.key === "D") {
-                this.makeMove(1)
+                this.makeMove(1);
             }
-        });
+        };
+    
+        window.addEventListener("keydown", this.handleKeydown);
     }
     
     startGame() {
@@ -96,7 +97,6 @@ export class PONGHandler {
         alert(`${winnerUsername} won the game`);
         this.ongoingGame = false;
         socket.emit("unsetGameId");
-        clearInterval(this.gameLoop);
         document.getElementById("game-front").style.display = "none";
         document.getElementById("home-front").style.display = "block";
         document.getElementById("PONG-front").style.display = "none";
@@ -104,6 +104,19 @@ export class PONGHandler {
 
     getPlayerInfo() {
         return JSON.parse(localStorage.getItem("lobby")).users;
+    }
+
+    destroy() {
+        // Remove socket event listeners
+        socket.off("updateGame");
+        socket.off("gameOver");
+    
+        // Remove window keydown event listener
+        window.removeEventListener("keydown", this.handleKeydown);
+    
+        this.pongGame = null;
+        this.ongoingGame = false;
+        this.gameIdSet = false;
     }
     
 }
