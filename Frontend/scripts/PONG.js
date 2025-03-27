@@ -58,10 +58,15 @@ export class PONGHandler {
             if (!this.gameIdSet) {
                 console.log("setting game id")
                 socket.emit("setGameId", payload.gameId);
+                this.gameIdSet = true
             }
             
             this.pongGame.updateGameState(payload);
         });
+
+        socket.on("gameOver", (winner) => {
+            this.endGame(winner)
+        })
 
         window.addEventListener("keydown", (event) => {
             if (event.key === "a" || event.key === "A") {
@@ -85,16 +90,20 @@ export class PONGHandler {
     }
 
     endGame(winnerID) {
-        const players = getPlayerInfo();
-    
+        const players = this.getPlayerInfo();
         const winnerUsername =
-            players.find((user) => user.id === winnerID)?.username || "nobody";
+            players.find((user) => Number(user.id) === Number(winnerID))?.username || "nobody";
         alert(`${winnerUsername} won the game`);
-        ongoingGame = false;
+        this.ongoingGame = false;
         socket.emit("unsetGameId");
         clearInterval(this.gameLoop);
         document.getElementById("game-front").style.display = "none";
         document.getElementById("home-front").style.display = "block";
         document.getElementById("PONG-front").style.display = "none";
     }
+
+    getPlayerInfo() {
+        return JSON.parse(localStorage.getItem("lobby")).users;
+    }
+    
 }
