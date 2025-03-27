@@ -24,16 +24,16 @@ class PlayerState {
 }
 
 export class PONGGame extends Game<number> {
-    static readonly PADDLE_MOVE_SPEED = 3
+    static readonly PADDLE_MOVE_SPEED = 1.7
     static readonly SCORE_TO_WIN = 10
     static readonly GAME_WIDTH = 100
     static readonly PADDLE_WIDTH = 15
     static readonly PADDLE_OFFSET = 5;
-    static readonly BALL_MIN_VELOCITY = 3
-    static readonly BALL_MAX_VELOCITY = 5
+    static readonly BALL_MIN_VELOCITY = 0.75
+    static readonly BALL_MAX_VELOCITY = 1.5
 
     ballPosition = new Vector(50, 50)
-    ballVelocity = new Vector(5, 5)
+    ballVelocity = new Vector(this.getRandomBallVelocity(), this.getRandomBallVelocity())
     playerStateMap: { [key: string]: PlayerState } = {};
 
     constructor(gameId: string, players: string[]) {

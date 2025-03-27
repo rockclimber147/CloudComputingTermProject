@@ -140,7 +140,7 @@ export class SocketSession {
             } catch (error) {
                 console.error("Error in game loop:", error);
             }
-        }, 50);
+        }, 25);
     }
 
     private stopGameLoop() {
