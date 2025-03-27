@@ -3,6 +3,7 @@ import { userRepository } from "../config/RepositoryInit.js";
 import { handleError } from '../modules/ErrorHandling.js';
 import { AuthRequest } from './AuthRoutes.js';
 import { Notification } from '../modules/Notification.js';
+import { emitUpdateFriends } from '../sockets/FriendRequestSocket.js';
 
 const router = express.Router();
 
@@ -37,6 +38,7 @@ router.post('/send-friend-request', async (req: AuthRequest, res: Response): Pro
         }
 
         const userFriend = await userRepository.sendFriendRequest(senderId, receiverId);
+        emitUpdateFriends(senderId, receiverId);
         Notification.sendFriendRequestNotification(senderId, receiverId);
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
@@ -55,6 +57,8 @@ router.post('/accept-friend-request', async (req: AuthRequest, res: Response): P
         }
 
         const userFriend = await userRepository.acceptFriendRequest(senderID, receiverID);
+        emitUpdateFriends(senderID, receiverID);
+        Notification.sendAcceptedFriendRequestNotification(senderID, receiverID)
 
         res.status(201).json({ message: "Friend request sent successfully!", userFriend });
     } catch (error: unknown) {
@@ -72,6 +76,8 @@ router.post('/reject-friend-request', async (req: AuthRequest, res: Response): P
         }
 
         const userFriend = await userRepository.rejectFriendRequest(senderID, receiverID);
+        emitUpdateFriends(senderID, receiverID);
+        Notification.sendRejectedFriendRequestNotification(senderID, receiverID)
 
         res.status(201).json({ message: "Friend request rejected successfully!", userFriend });
     } catch (error: unknown) {

@@ -1,16 +1,20 @@
 import { io } from "../config/SocketServer.js";
 import { LocalLobbyDatabase } from "./Databases.js";
-import { userNotificationRepository } from "../config/RepositoryInit.js";
+import {
+    userNotificationRepository,
+    userRepository,
+} from "../config/RepositoryInit.js";
 
 enum NotificationType {
     SentFriendRequest,
     ReceivedFriendRequest,
+    AcceptedFriendRequest,
+    RejectedFriendRequest,
 }
 
 const db = new LocalLobbyDatabase();
 
 export class Notification {
-    //TODO: make this an enum and do an action in the frontend maybe have it send a function
     type: NotificationType;
     text: string;
     title: string;
@@ -23,13 +27,13 @@ export class Notification {
 
     static async sendFriendRequestNotification(senderID: number, receiverID: number) {
         if (await db.isUserOnline(senderID)) {
-            console.log("sending to online user", senderID);
+            const recieverName = (await userRepository.getUser(receiverID)).username;
             io.to(senderID.toString()).emit(
                 "showNotification",
-                new this(
-                    NotificationType.SentFriendRequest,
-                    `Your have sent a friend request to ${receiverID}`,
-                    "Friend request success"
+                new SentFriendRequestNotification(
+                    `You have sent a friend request to ${recieverName}`,
+                    "Friend request success",
+                    receiverID
                 )
             );
         } else {
@@ -37,17 +41,83 @@ export class Notification {
         }
 
         if (await db.isUserOnline(receiverID)) {
-            console.log("sending to online user", receiverID);
+            const senderName = (await userRepository.getUser(senderID)).username;
             io.to(receiverID.toString()).emit(
                 "showNotification",
-                new this(
-                    NotificationType.ReceivedFriendRequest,
-                    `Your have recieved a friend request from ${senderID}`,
-                    "Recieved friend request"
+                new RecievedFriendRequestNotification(
+                    `Your have recieved a friend request from ${senderName}`,
+                    "Recieved friend request",
+                    senderID
                 )
             );
         } else {
             //TODO: save it in the database and show them later
         }
+    }
+
+    static async sendAcceptedFriendRequestNotification(
+        senderID: number,
+        receiverID: number
+    ) {
+        if (await db.isUserOnline(senderID)) {
+            const recieverName = (await userRepository.getUser(receiverID)).username;
+            io.to(senderID.toString()).emit(
+                "showNotification",
+                new AcceptedFriendRequestNotification(
+                    `Your Friend Request to ${recieverName} has been accepted`,
+                    "Accepted friend request"
+                )
+            );
+        } else {
+            //TODO: save it in the database and show them later
+        }
+    }
+
+    static async sendRejectedFriendRequestNotification(
+        senderID: number,
+        receiverID: number
+    ) {
+        if (await db.isUserOnline(senderID)) {
+            const recieverName = (await userRepository.getUser(receiverID)).username;
+            io.to(senderID.toString()).emit(
+                "showNotification",
+                new RejectedFriendRequestNotification(
+                    `Your Friend Request to ${recieverName} has been rejected`,
+                    "Rejected friend request"
+                )
+            );
+        } else {
+            //TODO: save it in the database and show them later
+        }
+    }
+}
+
+class SentFriendRequestNotification extends Notification {
+    recieverID: number;
+
+    constructor(text: string, title: string, recieverID: number) {
+        super(NotificationType.SentFriendRequest, text, title);
+        this.recieverID = recieverID;
+    }
+}
+
+class RecievedFriendRequestNotification extends Notification {
+    senderID: number;
+
+    constructor(text: string, title: string, senderID: number) {
+        super(NotificationType.ReceivedFriendRequest, text, title);
+        this.senderID = senderID;
+    }
+}
+
+class AcceptedFriendRequestNotification extends Notification {
+    constructor(text: string, title: string) {
+        super(NotificationType.AcceptedFriendRequest, text, title);
+    }
+}
+
+class RejectedFriendRequestNotification extends Notification {
+    constructor(text: string, title: string) {
+        super(NotificationType.AcceptedFriendRequest, text, title);
     }
 }

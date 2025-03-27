@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await refreshDropdowns()
 });
 
-async function refreshDropdowns() {
+export async function refreshDropdowns() {
     let loggedInId = JSON.parse(localStorage.getItem("user")).id
     const [allUsers, allFriendRequests] = await Promise.all([
         fetchUsers(),

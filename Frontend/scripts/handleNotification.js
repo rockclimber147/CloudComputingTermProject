@@ -1,78 +1,80 @@
 import socket from "./socket.js";
+import { acceptRequest, rejectRequest } from "./friendRequest.js";
 
 const NotificationType = {
-    0: handleSendFriendRequestNotification,
+    0: handleSimpleNotification, // sent request confirmations
     1: handleReceivedFriendRequestNotification,
+    2: handleSimpleNotification, // accept request
+    3: handleSimpleNotification, // reject request
 };
 
-socket.on("showNotification", (notificationInfo) => {
-    showNotification(notificationInfo);
+socket.on("showNotification", async (notificationInfo) => {
+    await showNotification(notificationInfo);
 });
 
 // notification should have a title, userWhoSendIt, message, action
-function showNotification(notificationInfo) {
-    NotificationType[notificationInfo.type](notificationInfo);
-
-    // console.log(notificationInfo);
+async function showNotification(notificationInfo) {
+    await NotificationType[notificationInfo.type](notificationInfo);
 }
 
-function handleSendFriendRequestNotification(notificationInfo) {
-    console.log("friend request sent");
-    console.log(notificationInfo);
-    // it should just say that it succeeeded
+function createNotification(notificationInfo, actions = []) {
+    const template = document.getElementById("notification-template");
+    const notificationContainer = document.getElementById("notification-container");
 
-    const notificationElement = document.createElement("div");
-    notificationElement.className = "notification";
-    notificationElement.style.position = "fixed";
-    notificationElement.style.bottom = "10px";
-    notificationElement.style.right = "10px";
-    notificationElement.style.backgroundColor = "#f8f9fa";
-    notificationElement.style.border = "1px solid #ddd";
-    notificationElement.style.padding = "10px";
-    notificationElement.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
-    notificationElement.innerHTML = `
-        <h4>${notificationInfo.title}</h4>
-        <p>${notificationInfo.text}</p>
-    `;
-    document.body.appendChild(notificationElement);
+    // Clone the template content
+    const notificationElement = template.content
+        .cloneNode(true)
+        .querySelector(".notification");
 
-    setTimeout(() => {
-        notificationElement.style.display = "none";
-    }, 3000);
-}
+    // Populate the notification content
+    notificationElement.querySelector(".notification-title").textContent =
+        notificationInfo.title;
+    notificationElement.querySelector(".notification-text").textContent =
+        notificationInfo.text;
 
-function handleReceivedFriendRequestNotification(notificationInfo) {
-    console.log("friend request recieved");
-    console.log(notificationInfo);
-    // there should be an accept notification button
-
-    const notificationElement = document.createElement("div");
-    notificationElement.className = "notification";
-    notificationElement.style.position = "fixed";
-    notificationElement.style.bottom = "10px";
-    notificationElement.style.right = "10px";
-    notificationElement.style.backgroundColor = "#f8f9fa";
-    notificationElement.style.border = "1px solid #ddd";
-    notificationElement.style.padding = "10px";
-    notificationElement.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
-    notificationElement.innerHTML = `
-        <h4>${notificationInfo.title}</h4>
-        <p>${notificationInfo.text}</p>
-        <button id="acceptButton">Accept</button>
-        <button id="rejectButton">Reject</button>
-    `;
-    document.body.appendChild(notificationElement);
-    document.getElementById("acceptButton").addEventListener("click", () => {
-        document.body.removeChild(notificationElement);
+    // Add actions (e.g., buttons)
+    const actionsContainer = notificationElement.querySelector(".notification-actions");
+    actions.forEach(({ label, onClick }) => {
+        const button = document.createElement("button");
+        button.textContent = label;
+        button.addEventListener("click", onClick);
+        actionsContainer.appendChild(button);
     });
 
-    document.getElementById("rejectButton").addEventListener("click", () => {
-        document.body.removeChild(notificationElement);
-    });
+    // Append the notification to the container
+    notificationContainer.appendChild(notificationElement);
 
+    // Automatically remove the notification after 5 seconds
     setTimeout(() => {
-        if (document.body.contains(notificationElement)) {
-            document.body.removeChild(notificationElement);
+        if (notificationContainer.contains(notificationElement)) {
+            notificationContainer.removeChild(notificationElement);
         }
-    }, 3000);
+    }, 5000);
+}
+
+async function handleSendFriendRequestNotification(notificationInfo) {
+    createNotification(notificationInfo);
+}
+
+async function handleSimpleNotification(notificationInfo) {
+    createNotification(notificationInfo);
+}
+
+async function handleReceivedFriendRequestNotification(notificationInfo) {
+    console.log("friend request recieved");
+
+    createNotification(notificationInfo, [
+        {
+            label: "Accept",
+            onClick: async () => {
+                await acceptRequest(notificationInfo.senderID);
+            },
+        },
+        {
+            label: "Reject",
+            onClick: async () => {
+                await rejectRequest(notificationInfo.senderID);
+            },
+        },
+    ]);
 }

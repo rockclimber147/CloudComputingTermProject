@@ -1,5 +1,6 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 import url from "./url.js";
+import { refreshDropdowns } from "./home.js";
 
 const socket = io(url);
 
@@ -28,6 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem("lobby");
         }
         localStorage.setItem("lobby", JSON.stringify(lobbies));
+    });
+
+    socket.on("updateFriends", async () => {
+        await refreshDropdowns()
     });
 
     //TODO: Add a text box or something for the error instead of alert
