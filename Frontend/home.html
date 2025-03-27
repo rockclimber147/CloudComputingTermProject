@@ -52,12 +52,12 @@
 
         <div id="home-front" class="container mt-5">
             
-            <div class="search-container" style="max-width: 300px; flex-grow: 1; top: 0; right: 0;">
+            <!-- <div class="search-container" style="max-width: 300px; flex-grow: 1; top: 0; right: 0;">
                 <p class="text-center mb-2" style="font-size: 16px; font-weight: bold;">Add a friend!</p>
                 <input type="text" id="searchInput" class="form-control" placeholder="Search by username...">
                 <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 290px; z-index: 1000; top: 100%; right: 10px;">
                 </ul>
-            </div>
+            </div> -->
 
             <h2 id="welcome">Welcome, User!</h2>
             <p class="lead">Join a lobby or invite friends to play.</p>
@@ -123,36 +123,21 @@
                 <!-- Add Friend Section -->
                 <div class="mb-3">
                     <input type="text" id="searchInput" class="form-control" placeholder="Search by username...">
-                    <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 290px; z-index: 1000; top: 100%; right: 10px;">
+                    <ul class="list-group position-absolute bg-white w-100 mt-2 shadow-sm overflow-hidden" id="searchResults" style="max-width: 290px; z-index: 1000; right:10px">
                     </ul>
-                    <button class="btn btn-sm btn-success w-100 mt-2">Add Friend</button>
+                    
                 </div>
 
                 <!-- Friends List -->
                 <h6 class="fw-bold">Your Friends</h6>
                 <ul class="list-group mb-3" id="friend-list">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Friend1</span>
-                        <button class="btn btn-sm btn-primary">Invite</button>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Friend2</span>
-                        <button class="btn btn-sm btn-primary">Invite</button>
-                    </li>
-                    <li class="list-group-item text-muted text-center small">No more friends...</li>
                 </ul>
 
                 <!-- Friend Requests -->
                 <h6 class="fw-bold">Friend Requests</h6>
                 <ul class="list-group" id="friend-requests">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>User123</span>
-                        <div>
-                            <button class="btn btn-sm btn-success me-1">Accept</button>
-                            <button class="btn btn-sm btn-danger">Decline</button>
-                        </div>
-                    </li>
-                    <li class="list-group-item text-muted text-center small">No new requests</li>
+                    
+                    
                 </ul>
             </div>
         </div>

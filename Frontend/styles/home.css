@@ -247,14 +247,14 @@ html, body {
 
 #friend-panel {
     border-radius: 15px;
-    overflow: hidden; /* Ensures header and body are perfectly aligned */
+    
     padding: 0;
     z-index:1;
     position: fixed;
      bottom: 90px; 
      right: 20px; 
      width: 300px; 
-     max-height: 800px; 
+     max-height: 1000px; 
      overflow-y: auto; 
      z-index: 1050; 
      display: none;
@@ -281,6 +281,9 @@ html, body {
 
 #friend-panel .btn-sm {
     font-size: 0.75rem;
+}
+.card-body{
+    height: 500px;
 }
 
 /*Footer*/

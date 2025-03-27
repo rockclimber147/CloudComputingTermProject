@@ -94,7 +94,7 @@ async function refreshDropdowns() {
         userMap
     ));
 
-    document.getElementById("requestsDropdown")
+    document.getElementById("friend-panel-toggle")
     .addEventListener("click", () => populateRequestsDropdown(
         receivedRequests.filter(u => u.status == "Pending"),
         userMap
@@ -177,19 +177,26 @@ async function populateUserWelcome() {
 }
 
 function populateFriendsDropdown(friends, userMap) {
-    console.log(friends)
+    console.log(friends);
+    
     let dropdown = document.getElementById("friendsList");
+    let friendsList = document.getElementById("friend-list"); // Target the friends list section
+
     dropdown.innerHTML = ""; // Clear existing content
+    friendsList.innerHTML = ""; // Clear existing content
 
     if (friends.length === 0) {
         dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No friends found</span></li>`;
+        friendsList.innerHTML = `<li class="list-group-item text-muted">No friends found</li>`;
         return;
     }
 
     friends.forEach(friend => {
-        let user = getUserForRequest(userMap, friend)
-        console.log(user)
-        let friendCard = `
+        let user = getUserForRequest(userMap, friend);
+        console.log(user);
+
+        // Populate dropdown
+        let friendDropdownItem = `
             <li>
                 <div class="dropdown-item">
                     <strong>${user.username}</strong><br>
@@ -198,7 +205,16 @@ function populateFriendsDropdown(friends, userMap) {
             </li>
             <li><hr class="dropdown-divider"></li>
         `;
-        dropdown.innerHTML += friendCard;
+        dropdown.innerHTML += friendDropdownItem;
+
+        // Populate friends list section
+        let friendListItem = `
+            <li class="list-group-item">
+                <strong>${user.username}</strong><br>
+                <small class="text-muted">${user.email}</small>
+            </li>
+        `;
+        friendsList.innerHTML += friendListItem;
     });
 }
 
@@ -289,7 +305,7 @@ function searchUsers(query, usermap, userFriends) {
 
 // Refactored populateRequestsDropdown function
 function populateRequestsDropdown(requests, userMap) {
-    let dropdown = document.getElementById("requestsList");
+    let dropdown = document.getElementById("friend-requests");
     dropdown.innerHTML = ""; // Clear existing content
 
     if (requests.length === 0) {
