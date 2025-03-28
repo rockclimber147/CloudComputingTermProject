@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "index.html";
     }
 
-    socket.on("connect", () => {
+    socket.on("connect", async () => {
         console.log("Connected to server");
-        socket.emit("login", token);
+        await socket.emitWithAck("login", token);
         createLobby();
     });
 

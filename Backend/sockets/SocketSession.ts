@@ -42,7 +42,7 @@ export class SocketSession {
 
     async createLobby() {
         if (!this.userID) {
-            throw new Error("User not authenticated in createLobby");
+            throw new Error("cannot create lobby without authentication")
         }
 
         const lobbyId = await this.db.createLobby(this.userID);
@@ -186,7 +186,7 @@ export class SocketSession {
 
     sendInvite(recieverID: number) {
         if (!this.userID) {
-            throw new Error("user not authencicated to send invite")
+            throw new Error("user not authencicated to send invite");
         }
 
         if (!this.lobbyId) {
