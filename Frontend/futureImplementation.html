@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Tech Stack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="public/favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tech-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            text-align: center;
+        }
+
+        .tech-item img {
+            width: 40px;
+            height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .tech-item p {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .tech-item img:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top w-100">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">TDP Games</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="ms-auto">
+                    <a href="index.html" class="btn btn-secondary btn-sm">Back</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5 mb-5"></div>
+        <h1>AWS Project Tech Stack</h1>
+        <h2>AWS Services</h2>
+        <div class="tech-stack">
+            <!-- Amazon RDS -->
+            <div class="tech-item">
+                <svg class="w-6 h-6" height="40" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Arch_Amazon-RDS_32_svg__a">
+                            <stop stop-color="#2E27AD" offset="0%"></stop>
+                            <stop stop-color="#527FFF" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" fill-rule="evenodd">
+                        <path d="M0 0h40v40H0z" fill="url(#Arch_Amazon-RDS_32_svg__a)"></path>
+                        <path
+                            d="M11.854 28.854L7.708 33H10.5v1h-4a.5.5 0 01-.5-.5v-4h1v2.793l4.147-4.146.707.707zM33 29.5h1v4c0 .277-.223.5-.5.5h-4v-1h2.793l-4.146-4.146.707-.707L33 32.293V29.5zm1-23v4h-1V7.708l-4.146 4.146-.707-.707L32.293 7H29.5V6h4a.5.5 0 01.5.5zm-27 4H6v-4a.5.5 0 01.5-.5h4v1H7.527l4.319 4.14-.691.721L7 7.88v2.62zm25.726 8.9c0-1.558-1.806-3.1-4.83-4.123l.32-.947c3.502 1.185 5.51 3.033 5.51 5.07 0 2.037-2.008 3.886-5.51 5.071l-.32-.948c3.024-1.023 4.83-2.565 4.83-4.123zm-24.989 0c0 1.492 1.69 2.993 4.521 4.014l-.34.94c-3.293-1.187-5.181-2.993-5.181-4.954 0-1.961 1.888-3.767 5.181-4.955l.34.941c-2.831 1.021-4.521 2.522-4.521 4.014zm12.286-3.681c-3.136 0-4.891-.799-4.917-1.125.026-.326 1.781-1.125 4.917-1.125 3.133 0 4.89.798 4.917 1.125-.027.326-1.784 1.125-4.917 1.125zm0 3.555c-3.182 0-4.917-.926-4.917-1.402v-2.03c1.135.595 3.069.877 4.917.877 1.848 0 3.782-.282 4.917-.877v2.03c0 .476-1.735 1.402-4.917 1.402zm0 3.737c-3.182 0-4.917-.927-4.917-1.403v-2.343c1.119.665 3.023 1.009 4.917 1.009 1.894 0 3.798-.344 4.917-1.009v2.343c0 .476-1.735 1.403-4.917 1.403zm0 3.279c-3.182 0-4.917-.915-4.917-1.385v-1.904c1.119.666 3.023 1.01 4.917 1.01 1.894 0 3.798-.344 4.917-1.01v1.904c0 .47-1.735 1.385-4.917 1.385zm0-13.821c-2.85 0-5.917.665-5.917 2.125v10.311c0 1.566 2.977 2.385 5.917 2.385s5.917-.819 5.917-2.385V14.594c0-1.46-3.067-2.125-5.917-2.125z"
+                            fill="#FFF"></path>
+                    </g>
+                </svg>
+                <p>Amazon RDS</p>
+                <small>Managed relational database service.</small>
+            </div>
+
+            <!-- Amazon ElastiCache -->
+            <div class="tech-item">
+                <svg class="w-6 h-6" height="40" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Arch_Amazon-ElastiCache_32_svg__a">
+                            <stop stop-color="#2E27AD" offset="0%"></stop>
+                            <stop stop-color="#527FFF" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" fill-rule="evenodd">
+                        <path d="M0 0h40v40H0z" fill="url(#Arch_Amazon-ElastiCache_32_svg__a)"></path>
+                        <path
+                            d="M25 22.036v-2.904c-1.081.705-2.872 1.15-4.984 1.15-2.228 0-3.968-.4-5.016-1.078v2.832c0 .728 1.918 1.514 5.016 1.514 3.12 0 4.984-.77 4.984-1.514zm0 4.12v-2.623c-1.017.638-2.755 1.01-4.984 1.01-2.245 0-3.995-.373-5.016-1.013v2.625c0 .692 1.786 1.693 5.016 1.693 3.209 0 4.984-1.001 4.984-1.693zm0 3.808v-2.242c-1.035.697-2.806 1.12-4.984 1.12-2.194 0-3.976-.425-5.016-1.123v2.245c0 .72 1.904 2.042 5.016 2.042 3.091 0 4.984-1.321 4.984-2.042zm-10.097-12.46c0 .877 1.912 1.783 5.113 1.783 3.101 0 5.081-1.055 5.081-1.782 0-.655-1.766-1.562-5.081-1.562-3.167 0-5.113.91-5.113 1.562zm11.194 0c0 .174-.036.342-.097.504v11.956C26 31.61 23.26 33 20.016 33 16.755 33 14 31.61 14 29.964v-11.93a1.656 1.656 0 01-.097-.53c0-1.755 3.168-2.555 6.113-2.555 3.027 0 6.081.79 6.081 2.556zm7.403-6.032c.276 0 .5-.222.5-.497V7.497A.499.499 0 0033.5 7h-27c-.276 0-.5.223-.5.497v3.478c0 .275.224.497.5.497.552 0 1 .446 1 .994a.998.998 0 01-1 .993c-.276 0-.5.223-.5.497v9.44c0 .276.224.497.5.497H12V22.9H9v-.994h3v-.994H8.5c-.276 0-.5.223-.5.497v1.49H7V14.39c.861-.221 1.5-1 1.5-1.924 0-.925-.639-1.704-1.5-1.924V7.994h26v2.548c-.861.22-1.5 1-1.5 1.924 0 .924.639 1.703 1.5 1.924v8.51h-1v-1.49a.499.499 0 00-.5-.498H28v.994h3v.994h-3v.993h5.5c.276 0 .5-.221.5-.496v-9.44a.499.499 0 00-.5-.498c-.552 0-1-.446-1-.993a.998.998 0 011-.994zm-21-1.49h-2c-.276 0-.5.222-.5.496v7.95c0 .275.224.497.5.497H12v-.994h-1v-6.956h1v2.981h1v-3.478a.499.499 0 00-.5-.497zm15.5 7.95v.993h1.5c.276 0 .5-.222.5-.497v-7.95a.499.499 0 00-.5-.497h-2c-.276 0-.5.223-.5.497v3.478h1v-2.981h1v6.956h-1zm-3-4.97v-2.484a.499.499 0 00-.5-.497h-3c-.276 0-.5.223-.5.497v2.484h1v-1.987h2v1.987h1zm-7 0v-1.987h-2v1.987h-1v-2.484c0-.274.224-.497.5-.497h3c.276 0 .5.223.5.497v2.484h-1z"
+                            fill="#FFF"></path>
+                    </g>
+                </svg>
+                <p>Amazon ElastiCache</p>
+                <small>In-memory data store for caching.</small>
+            </div>
+
+            <!-- Amazon Elastic Beanstalk -->
+            <div class="tech-item">
+                <svg class="w-6 h-6" height="40" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Arch_AWS-Elastic-Beanstalk_32_svg__a">
+                            <stop stop-color="#C8511B" offset="0%"></stop>
+                            <stop stop-color="#F90" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" fill-rule="evenodd">
+                        <path d="M0 0h40v40H0z" fill="url(#Arch_AWS-Elastic-Beanstalk_32_svg__a)"></path>
+                        <path
+                            d="M25.5 22.594c0-.82-.673-1.486-1.5-1.486s-1.5.667-1.5 1.486c0 .818.673 1.485 1.5 1.485s1.5-.667 1.5-1.485M20 17.148c.827 0 1.5-.667 1.5-1.485 0-.82-.673-1.486-1.5-1.486s-1.5.667-1.5 1.486c0 .818.673 1.485 1.5 1.485m-5 5.94c.827 0 1.5-.666 1.5-1.485 0-.818-.673-1.485-1.5-1.485s-1.5.667-1.5 1.485c0 .82.673 1.486 1.5 1.486m11.5-.495c0 1.195-.86 2.195-2 2.424v3.516a.498.498 0 01-.5.496h-3.5V32h-1v-5.94H15a.498.498 0 01-.5-.496v-1.536c-1.14-.23-2-1.23-2-2.425 0-1.364 1.121-2.475 2.5-2.475s2.5 1.111 2.5 2.475c0 1.196-.86 2.196-2 2.425v1.041h4v-6.982c-1.14-.23-2-1.23-2-2.424 0-1.365 1.121-2.476 2.5-2.476s2.5 1.111 2.5 2.476c0 1.195-.86 2.195-2 2.424v9.952h3v-3.02c-1.14-.23-2-1.23-2-2.425 0-1.365 1.121-2.476 2.5-2.476s2.5 1.111 2.5 2.476m7.5-2.525c0 3.686-2.776 5-5.375 5v-.99c1.315 0 4.375-.391 4.375-4.01 0-2.708-2.079-3.69-3.823-4.036a.497.497 0 01-.401-.456c-.127-2.122-1.378-2.876-2.41-2.876-.698 0-1.353.33-1.796.905a.513.513 0 01-.471.19.497.497 0 01-.395-.32c-.4-1.074-.975-1.974-1.705-2.673-1.88-1.805-4.452-2.293-6.878-1.308-2.017.813-3.595 3.162-3.595 5.35 0 .242.016.485.045.722a.495.495 0 01-.376.541C10.002 16.401 8 17.3 8 20.031c0 .092.005.181.009.266.121 2.133 2.002 3.782 4.285 3.782h.206v.99h-.206c-2.813 0-5.133-2.06-5.282-4.688A6.686 6.686 0 017 20.03c0-3.166 2.223-4.346 3.539-4.766a6.517 6.517 0 01-.013-.42c0-2.604 1.813-5.298 4.217-6.267 2.805-1.14 5.779-.573 7.951 1.514a7.758 7.758 0 011.651 2.332c1.734-1.391 4.968-.815 5.396 2.719 2.75.662 4.259 2.4 4.259 4.926"
+                            fill="#FFF"></path>
+                    </g>
+                </svg>
+                <p>Amazon Elastic Beanstalk</p>
+                <small>Platform for deploying and managing apps.</small>
+            </div>
+
+            <!-- Amazon S3 -->
+            <div class="tech-item">
+                <svg class="w-6 h-6" height="40" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Arch_Amazon-S3-Standard_32_svg__a">
+                            <stop stop-color="#1B660F" offset="0%"></stop>
+                            <stop stop-color="#6CAE3E" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" fill-rule="evenodd">
+                        <path d="M0 0h40v40H0z" fill="url(#Arch_Amazon-S3-Standard_32_svg__a)"></path>
+                        <path
+                            d="M30.074 22.671l.2-1.301c1.703 1.016 1.735 1.444 1.732 1.46-.004.003-.308.24-1.932-.159zm-10.185-3.733a.995.995 0 01-.992.994.994.994 0 010-1.99c.547 0 .992.448.992.996zm7.869 12.33c0 .123-.495.31-.93.478l-.445.17c-.475.189-1.037.359-1.669.504-1.576.366-3.75.585-5.817.585-5.503 0-8.435-1.009-8.439-1.798L8.256 13.57c1.899 1.452 5.8 2.382 10.641 2.382 4.63 0 9.364-.897 11.584-2.472l-1.366 8.92c-2.871-.874-6.392-2.56-8.132-3.398l-.105-.05.002-.015c0-1.098-.89-1.99-1.983-1.99a1.988 1.988 0 00-1.983 1.99c0 1.097.89 1.99 1.983 1.99.733 0 1.367-.407 1.71-1.002 1.806.868 5.41 2.591 8.356 3.468l-1.205 7.874zm-8.86-23.273c6.676 0 11.857 1.86 11.894 3.465l-.024.148c-.27 1.579-5.352 3.35-11.87 3.35-6.388 0-10.71-1.725-10.89-3.375l-.015-.12c.023-1.678 4.397-3.468 10.904-3.468zm11.538 12.318l1.344-8.76c.001-.026.006-.05.006-.076C31.786 8.674 25.233 7 18.897 7 12.003 7 7 8.883 7 11.477l.003.061 2.468 19.73c0 2.6 7.852 2.732 9.426 2.732 2.137 0 4.394-.228 6.04-.61a12.74 12.74 0 001.81-.548l.432-.167c.844-.321 1.57-.598 1.564-1.331l1.18-7.684c.655.158 1.197.24 1.63.24.58-.001.973-.143 1.21-.428a.982.982 0 00.219-.832c-.127-.681-.923-1.405-2.546-2.327z"
+                            fill="#FFF"></path>
+                    </g>
+                </svg>
+                <p>Amazon S3</p>
+                <small>Scalable storage for data backup and archival.</small>
+            </div>
+
+            <!-- Amazon EC2 -->
+            <div class="tech-item">
+                <svg class="w-6 h-6" height="40" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Arch_Amazon-EC2_32_svg__a">
+                            <stop stop-color="#C8511B" offset="0%"></stop>
+                            <stop stop-color="#F90" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" fill-rule="evenodd">
+                        <path d="M0 0h40v40H0z" fill="url(#Arch_Amazon-EC2_32_svg__a)"></path>
+                        <path
+                            d="M26.052 27L26 13.948 13 14v13.052L26.052 27zM27 14h2v1h-2v2h2v1h-2v2h2v1h-2v2h2v1h-2v2h2v1h-2v.052a.95.95 0 01-.948.948H26v2h-1v-2h-2v2h-1v-2h-2v2h-1v-2h-2v2h-1v-2h-2v2h-1v-2h-.052a.95.95 0 01-.948-.948V27h-2v-1h2v-2h-2v-1h2v-2h-2v-1h2v-2h-2v-1h2v-2h-2v-1h2v-.052a.95.95 0 01.948-.948H13v-2h1v2h2v-2h1v2h2v-2h1v2h2v-2h1v2h2v-2h1v2h.052a.95.95 0 01.948.948V14zm-6 19H7V19h2v-1H7.062C6.477 18 6 18.477 6 19.062v13.876C6 33.523 6.477 34 7.062 34h13.877c.585 0 1.061-.477 1.061-1.062V31h-1v2zM34 7.062v13.876c0 .585-.476 1.062-1.061 1.062H30v-1h3V7H19v3h-1V7.062C18 6.477 18.477 6 19.062 6h13.877C33.524 6 34 6.477 34 7.062z"
+                            fill="#FFF"></path>
+                    </g>
+                </svg>
+                    
+                <p>Amazon EC2</p>
+                <small>Scalable compute capacity in the cloud.</small>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
