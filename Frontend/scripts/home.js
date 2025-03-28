@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     refreshLobby();
-    populateUserWelcome()
+    populateUserWelcome();
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
@@ -22,8 +22,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Please enter a lobby id");
             return;
         }
-
-
 
         joinLobby(lobbyId);
     });
@@ -44,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const currentUser = JSON.parse(localStorage.getItem("user"));
-        
+
         if (!(currentUser.id === host.id)) {
             alert("Only the host can start the game");
             return;
@@ -57,58 +55,64 @@ document.addEventListener("DOMContentLoaded", async () => {
         refreshLobby();
     });
 
-    console.log("here")
+    console.log("here");
 
-    const logoutLink = document.getElementById("logout")
+    const logoutLink = document.getElementById("logout");
     logoutLink?.addEventListener("click", async (event) => {
         event.preventDefault();
-        console.log("logout clicked")
-        await logout()
+        console.log("logout clicked");
+        await logout();
     });
 
-    document.addEventListener("click", function(event) {
-        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+    document.addEventListener("click", function (event) {
+        if (
+            !searchInput.contains(event.target) &&
+            !searchResults.contains(event.target)
+        ) {
             searchResults.style.display = "none"; // Hide the results
         }
     });
 
-    await refreshDropdowns()
+    await refreshDropdowns();
 });
 
 async function refreshDropdowns() {
-    let loggedInId = JSON.parse(localStorage.getItem("user")).id
+    let loggedInId = JSON.parse(localStorage.getItem("user")).id;
     const [allUsers, allFriendRequests] = await Promise.all([
         fetchUsers(),
-        fetchAuth(`${url}/api/users/friends`, "GET")
+        fetchAuth(`${url}/api/users/friends`, "GET"),
     ]);
 
-    const dbUsers = allUsers.filter(u => u.id != loggedInId)
+    const dbUsers = allUsers.filter((u) => u.id != loggedInId);
     const userMap = new Map();
-    dbUsers.forEach(user => {
-        userMap.set(user.id, user);  // Use user ID as the key
+    dbUsers.forEach((user) => {
+        userMap.set(user.id, user); // Use user ID as the key
     });
-    const receivedRequests = allFriendRequests.filter(f => f.receiverID == loggedInId)
-    document.getElementById("friendsDropdown")
-    .addEventListener("click", populateFriendsDropdown(
-        allFriendRequests.filter(u => u.status == "Accepted"),
-        userMap
-    ));
+    const receivedRequests = allFriendRequests.filter(
+        (f) => f.receiverID == loggedInId
+    );
+    document.getElementById("friendsDropdown").addEventListener(
+        "click",
+        populateFriendsDropdown(
+            allFriendRequests.filter((u) => u.status == "Accepted"),
+            userMap
+        )
+    );
 
-    document.getElementById("friend-panel-toggle")
-    .addEventListener("click", () => populateRequestsDropdown(
-        receivedRequests.filter(u => u.status == "Pending"),
-        userMap
-    ));
+    document.getElementById("friend-panel-toggle").addEventListener("click", () =>
+        populateRequestsDropdown(
+            receivedRequests.filter((u) => u.status == "Pending"),
+            userMap
+        )
+    );
 
-
-    document.getElementById("searchInput")
-    .addEventListener("input", (event) => {
+    document.getElementById("searchInput").addEventListener("input", (event) => {
         searchUsers(event.target.value, userMap, allFriendRequests);
     });
 
     const query = document.getElementById("searchInput").value.trim();
     if (query) {
-        searchUsers(query, userMap, allFriendRequests);  // Reapply search with updated data
+        searchUsers(query, userMap, allFriendRequests); // Reapply search with updated data
     }
 }
 
@@ -123,12 +127,13 @@ function getLobbyUsers() {
 
 function refreshLobbyUsers() {
     const users = getLobbyUsers();
-    
+
     const userList = document.getElementById("lobby-users");
-    userList.innerHTML = ""; 
+    userList.innerHTML = "";
 
     if (users.length === 0) {
-        userList.innerHTML = '<p class="text-muted text-center">Waiting for players...</p>';
+        userList.innerHTML =
+            '<p class="text-muted text-center">Waiting for players...</p>';
         return;
     }
 
@@ -147,7 +152,7 @@ function refreshLobbyID() {
     }
 
     const lobbyId = JSON.parse(lobby).id;
-    
+
     document.getElementById("lobby-id-text").textContent = lobbyId;
 }
 
@@ -159,10 +164,9 @@ function getHost() {
     const lobbyJson = JSON.parse(lobby);
 
     const users = lobbyJson.users;
-    
+
     return users.filter((user) => user.id == lobbyJson.host)[0];
 }
-
 
 function refreshLobby() {
     refreshLobbyUsers();
@@ -170,15 +174,15 @@ function refreshLobby() {
 }
 
 async function populateUserWelcome() {
-    let currentUser = JSON.parse(localStorage.getItem("user"))
-    console.log(currentUser)
-    let header = document.getElementById("welcome")
-    header.innerText = `Welcome, ${currentUser.username}`
+    let currentUser = JSON.parse(localStorage.getItem("user"));
+    console.log(currentUser);
+    let header = document.getElementById("welcome");
+    header.innerText = `Welcome, ${currentUser.username}`;
 }
 
 function populateFriendsDropdown(friends, userMap) {
     console.log(friends);
-    
+
     let dropdown = document.getElementById("friendsList");
     let friendsList = document.getElementById("friend-list"); // Target the friends list section
 
@@ -191,7 +195,7 @@ function populateFriendsDropdown(friends, userMap) {
         return;
     }
 
-    friends.forEach(friend => {
+    friends.forEach((friend) => {
         let user = getUserForRequest(userMap, friend);
         console.log(user);
 
@@ -228,8 +232,10 @@ async function fetchUsers() {
 }
 
 async function addFriend(userId) {
-    console.log("Adding friend with id: " + userId)
-    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
+    console.log("Adding friend with id: " + userId);
+    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {
+        receiverId: userId,
+    });
     refreshDropdowns();
 }
 
@@ -237,11 +243,11 @@ async function addFriend(userId) {
 function createUserInfoDiv(username, email) {
     let userInfoDiv = document.createElement("div");
     userInfoDiv.classList.add("d-flex", "flex-column", "text-truncate");
-    
+
     let usernameStrong = document.createElement("strong");
     usernameStrong.textContent = username;
     userInfoDiv.appendChild(usernameStrong);
-    
+
     let userEmailSmall = document.createElement("small");
     userEmailSmall.classList.add("text-muted");
     userEmailSmall.textContent = email;
@@ -269,21 +275,30 @@ function searchUsers(query, usermap, userFriends) {
 
     if (!query.trim()) return; // Don't show results if empty
 
-    let filteredUsers = [...usermap.values()].filter(user => user.username.toLowerCase().includes(query.toLowerCase()));
+    let filteredUsers = [...usermap.values()].filter((user) =>
+        user.username.toLowerCase().includes(query.toLowerCase())
+    );
 
     if (filteredUsers.length === 0) {
         resultsContainer.innerHTML = `<li class="list-group-item text-muted">No users found</li>`;
         return;
     }
 
-    filteredUsers.forEach(user => {
+    filteredUsers.forEach((user) => {
         let userItem = document.createElement("li");
-        userItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+        userItem.classList.add(
+            "list-group-item",
+            "d-flex",
+            "justify-content-between",
+            "align-items-center"
+        );
 
         let userInfoDiv = createUserInfoDiv(user.username, user.email);
 
         // Determine button text and enable state
-        let existingFriend = userFriends.find(f => f.senderID == user.id || f.receiverID == user.id);
+        let existingFriend = userFriends.find(
+            (f) => f.senderID == user.id || f.receiverID == user.id
+        );
         let buttonText = "Add Friend";
         let enabled = true;
         if (existingFriend) {
@@ -295,7 +310,12 @@ function searchUsers(query, usermap, userFriends) {
             }
         }
 
-        let addButton = createButton(buttonText, ["btn-primary", "flex-shrink-0"], () => addFriend(user.id), !enabled);
+        let addButton = createButton(
+            buttonText,
+            ["btn-primary", "flex-shrink-0"],
+            () => addFriend(user.id),
+            !enabled
+        );
 
         userItem.appendChild(userInfoDiv);
         userItem.appendChild(addButton);
@@ -309,22 +329,38 @@ function populateRequestsDropdown(requests, userMap) {
     dropdown.innerHTML = ""; // Clear existing content
 
     if (requests.length === 0) {
-        dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No pending requests</span></li>`;
+        dropdown.innerHTML = `
+            <li class="list-group-item text-center text-muted d-flex flex-column align-items-center">
+                <i class="fas fa-user-friends fa-2x mb-2"></i>
+                <p class="mb-0">No pending friend requests</p>
+            </li>
+        `;
         return;
     }
 
-    requests.forEach(request => {
-        let user = getUserForRequest(userMap, request)
+    requests.forEach((request) => {
+        let user = getUserForRequest(userMap, request);
 
         let requestCard = document.createElement("li");
-        requestCard.classList.add("dropdown-item");
+        requestCard.classList.add(
+            "list-group-item",
+            "d-flex",
+            "flex-column",
+            "align-items-start"
+        );
+
         let userInfoDiv = createUserInfoDiv(user.username, user.email);
 
-        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.senderID));
-        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.senderID));
-
         let buttonDiv = document.createElement("div");
-        buttonDiv.classList.add("d-flex", "justify-content-end");
+        buttonDiv.classList.add("d-flex", "justify-content-end", "mt-2", "gap-2");
+
+        let acceptButton = createButton("Accept", ["btn-success"], () =>
+            acceptRequest(request.senderID)
+        );
+        let declineButton = createButton("Reject", ["btn-danger"], () =>
+            rejectRequest(request.senderID)
+        );
+
         buttonDiv.appendChild(acceptButton);
         buttonDiv.appendChild(declineButton);
 
@@ -337,25 +373,26 @@ function populateRequestsDropdown(requests, userMap) {
 
 function getUserForRequest(usermap, friend) {
     let loggedInId = JSON.parse(localStorage.getItem("user")).id;
-    let send = friend.senderID; 
-    let receive = friend.receiverID; 
+    let send = friend.senderID;
+    let receive = friend.receiverID;
     let userId;
 
-    
     if (send !== loggedInId) {
-        userId = send; 
+        userId = send;
     } else {
         userId = receive;
     }
-    
-    console.log('Resolved User ID:', userId);
-    return usermap.get(userId)
+
+    console.log("Resolved User ID:", userId);
+    return usermap.get(userId);
 }
 
 async function acceptRequest(userId) {
     try {
-        console.log(userId)
-        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { senderID: userId });
+        console.log(userId);
+        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", {
+            senderID: userId,
+        });
         alert("Friend request accepted!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {
@@ -363,10 +400,11 @@ async function acceptRequest(userId) {
     }
 }
 
-
 async function rejectRequest(userId) {
     try {
-        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", { senderID: userId });
+        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", {
+            senderID: userId,
+        });
         alert("Friend request declined!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {
@@ -374,18 +412,14 @@ async function rejectRequest(userId) {
     }
 }
 
+const toggleButton = document.getElementById("friend-panel-toggle");
+const friendPanel = document.getElementById("friend-panel");
 
-const toggleButton = document.getElementById('friend-panel-toggle');
-const friendPanel = document.getElementById('friend-panel');
-
-
-toggleButton.addEventListener('click', () => {
-    const isVisible = friendPanel.style.display === 'block';
-    friendPanel.style.display = isVisible ? 'none' : 'block';
-
+toggleButton.addEventListener("click", () => {
+    const isVisible = friendPanel.style.display === "block";
+    friendPanel.style.display = isVisible ? "none" : "block";
 });
 
-document.getElementById('close-friend-panel').addEventListener('click', () => {
-    document.getElementById('friend-panel').style.display = 'none';
+document.getElementById("close-friend-panel").addEventListener("click", () => {
+    document.getElementById("friend-panel").style.display = "none";
 });
-
