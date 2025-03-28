@@ -46,7 +46,7 @@ io.on("connection", async (socket: Socket) => {
         }
     });
 
-    socket.on("login", async (token: string) => {
+    socket.on("login", async (token: string, callback) => {
         console.log("Login with token", token);
 
         try {
@@ -57,6 +57,7 @@ io.on("connection", async (socket: Socket) => {
             socket.emit("error", error.message);
             return;
         }
+        callback("yep");
     });
 
     socket.on("setGameId", async (gameId: string) => {
