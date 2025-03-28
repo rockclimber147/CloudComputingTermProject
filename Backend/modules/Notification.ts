@@ -10,6 +10,7 @@ enum NotificationType {
     ReceivedFriendRequest,
     AcceptedFriendRequest,
     RejectedFriendRequest,
+    LobbyInvite,
 }
 
 const db = new LocalLobbyDatabase();
@@ -90,6 +91,24 @@ export class Notification {
             //TODO: save it in the database and show them later
         }
     }
+
+    static async sendLobbyInvite(
+        senderID: number,
+        recieverID: number,
+        lobbyID: string
+    ) {
+        if (await db.isUserOnline(recieverID)) {
+            const senderName = (await userRepository.getUser(senderID)).username;
+            io.to(recieverID.toString()).emit(
+                "showNotification",
+                new LobbyInviteNotification(
+                    lobbyID,
+                    `You have recieved a invite to join ${senderName}'s lobby`,
+                    "Lobby invite"
+                )
+            );
+        }
+    }
 }
 
 class SentFriendRequestNotification extends Notification {
@@ -119,5 +138,13 @@ class AcceptedFriendRequestNotification extends Notification {
 class RejectedFriendRequestNotification extends Notification {
     constructor(text: string, title: string) {
         super(NotificationType.AcceptedFriendRequest, text, title);
+    }
+}
+
+class LobbyInviteNotification extends Notification {
+    lobbyID: string;
+    constructor(lobbyID: string, text: string, title: string) {
+        super(NotificationType.LobbyInvite, text, title);
+        this.lobbyID = lobbyID;
     }
 }

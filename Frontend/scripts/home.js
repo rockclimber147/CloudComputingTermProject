@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 export async function refreshDropdowns() {
-    let loggedInId = JSON.parse(localStorage.getItem("user")).id
+    let loggedInId = JSON.parse(localStorage.getItem("user")).id;
     const [allUsers, allFriendRequests] = await Promise.all([
         fetchUsers(),
         fetchAuth(`${url}/api/users/friends`, "GET"),
@@ -224,9 +224,17 @@ function populateFriendsDropdown(friends, userMap) {
             <li class="list-group-item">
                 <strong>${user.username}</strong><br>
                 <small class="text-muted">${user.email}</small>
+                <button class="btn btn-sm btn-primary invite-button" data-user-id="${user.id}">Invite</button>
             </li>
         `;
         friendsList.innerHTML += friendListItem;
+    });
+
+    friendsList.addEventListener("click", (event) => {
+        if (event.target.classList.contains("invite-button")) {
+            const userId = event.target.dataset.userId;
+            inviteFriend(userId);
+        }
     });
 }
 
@@ -415,3 +423,8 @@ toggleButton.addEventListener("click", () => {
 document.getElementById("close-friend-panel").addEventListener("click", () => {
     document.getElementById("friend-panel").style.display = "none";
 });
+
+function inviteFriend(id) {
+    console.log(id);
+    socket.emit("inviteLobby", id);
+}

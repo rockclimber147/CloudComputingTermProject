@@ -3,6 +3,7 @@ import { LobbyDatabase, LocalLobbyDatabase } from "../modules/Databases.js";
 import { io } from "../config/SocketServer.js";
 import { GameManager, GamesEnum } from "../modules/games/GameManager.js";
 import { Game } from "../modules/games/Game.js";
+import { Notification } from "../modules/Notification.js";
 
 const gameManager = new GameManager();
 
@@ -77,8 +78,8 @@ export class SocketSession {
 
         await this.db.leaveLobby(this.lobbyId, this.userID);
         await this.socket.leave(this.lobbyId);
-        this.lobbyId = null
-        await this.updateLobbyMembers(prevLobbyId)
+        this.lobbyId = null;
+        await this.updateLobbyMembers(prevLobbyId);
     }
 
     async emitGameType(game: number) {
@@ -131,7 +132,7 @@ export class SocketSession {
                     this.stopGameLoop();
                     return;
                 }
-                game.update()
+                game.update();
                 io.to(this.lobbyId!).emit("updateGame", game);
 
                 if (game.isGameOver()) {
@@ -178,9 +179,21 @@ export class SocketSession {
         if (!this.lobbyId) {
             throw new Error("user not part of a lobby in gameOver");
         }
-        console.log("Game over with winner: " + winner)
+        console.log("Game over with winner: " + winner);
         io.to(this.lobbyId).emit("gameOver", winner);
         this.unsetGameID();
+    }
+
+    sendInvite(recieverID: number) {
+        if (!this.userID) {
+            throw new Error("user not authencicated to send invite")
+        }
+
+        if (!this.lobbyId) {
+            throw new Error("No lobby exists to send an invite");
+        }
+
+        Notification.sendLobbyInvite(this.userID, recieverID, this.lobbyId);
     }
 
     private async updateLobbyMembers(lobbyId: string) {

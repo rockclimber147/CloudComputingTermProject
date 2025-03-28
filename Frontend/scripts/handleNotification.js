@@ -1,4 +1,4 @@
-import socket from "./socket.js";
+import socket, { joinLobby } from "./socket.js";
 import { acceptRequest, rejectRequest } from "./friendRequest.js";
 
 const NotificationType = {
@@ -6,6 +6,7 @@ const NotificationType = {
     1: handleReceivedFriendRequestNotification,
     2: handleSimpleNotification, // accept request
     3: handleSimpleNotification, // reject request
+    4: handleLobbyInviteNotification
 };
 
 socket.on("showNotification", async (notificationInfo) => {
@@ -74,6 +75,26 @@ async function handleReceivedFriendRequestNotification(notificationInfo) {
             label: "Reject",
             onClick: async () => {
                 await rejectRequest(notificationInfo.senderID);
+            },
+        },
+    ]);
+}
+
+async function handleLobbyInviteNotification(notificationInfo) {
+    createNotification(notificationInfo, [
+        {
+            label: "Join",
+            onClick: async () => {
+                // Logic to join the lobby
+                console.log(`Joining lobby with ID: ${notificationInfo.lobbyID}`);
+                joinLobby(notificationInfo.lobbyID)
+            },
+        },
+        {
+            label: "Decline",
+            onClick: () => {
+                console.log(`Declined lobby invite with ID: ${notificationInfo.lobbyID}`);
+                // Add your decline logic here if needed
             },
         },
     ]);
