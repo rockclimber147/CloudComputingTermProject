@@ -4,11 +4,13 @@ import userRoutes from "./routes/UserRoutes.js";
 import userNotificationRoutes from "./routes/UserNotificationRoutes.js";
 import gameResultsRoutes from "./routes/GameResultsRoutes.js";
 import authRoutes from "./routes/AuthRoutes.js";
+import adminRoutes from "./routes/AdminRoutes.js"
 import startApp from "./config/AppStartup.js";
 import { app, server } from "./config/Server.js";
 import "./sockets/SocketHandler.js";
 import path from "path";
 import { authMiddleware } from "./routes/AuthRoutes.js";
+import { adminMiddleware } from "./routes/AdminRoutes.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -54,6 +56,15 @@ app.use((req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/notifications", userNotificationRoutes);
 app.use("/api/GameResults", gameResultsRoutes);
+
+app.use((req, res, next) => {
+    if (!req.path.startsWith('/api/admin')) {
+        return next();
+    }
+    adminMiddleware(req, res, next);
+});
+
+app.use("/api/admin", adminRoutes)
 
 startApp()
     .then(() => {

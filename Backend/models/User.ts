@@ -66,8 +66,17 @@ class UserBasicInfo {
     }
 }
 
+class UserWithRoles extends UserBasicInfo {
+  roles: number[]
+  constructor(user: User, roles: number[] ) {
+      super(user)
+      this.roles = roles
+  }
+}
+
 export {
     User,
     initializeUserModel,
-    UserBasicInfo
+    UserBasicInfo,
+    UserWithRoles
 }
