@@ -1,7 +1,9 @@
 import { refreshLogin } from "./refreshLogin.js";
 import socket, { joinLobby } from "./socket.js";
-import { logout, fetchAuth } from "./auth.js";
+import { logout, fetchAuth, adminRolesEnum } from "./auth.js";
 import url from "./url.js";
+import { TicTacToeHandler } from "./TicTacToeRefactored.js";
+import { PONGHandler } from "./PONG.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const isLoggedIn = await refreshLogin();
@@ -9,8 +11,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html";
     }
 
+    let currentGame;
+
+    socket.on("setGame", (game) => {
+        console.log("in setGame")
+        console.log(game)
+
+        if (currentGame) {
+            currentGame.destroy();
+            currentGame = null; // Clear reference
+        }
+
+        if (game == 0){
+            console.log("Tic tac toe init")
+            currentGame = new TicTacToeHandler()
+        }
+        else if (game == 1){
+            console.log("PONG init")
+            currentGame = new PONGHandler("PONG-Canvas")
+        }
+        currentGame.startGame()
+    })
+
     refreshLobby();
-    populateUserWelcome();
+    populateUserWelcome()
+    addAdminButton()
+
+    let selectedGameId = 0; // Default to Tic Tac Toe
+    
+
+    document.getElementById("game-selection").addEventListener("change", (event) => {
+        selectedGameId = parseInt(event.target.value, 10);
+        console.log("Selected game ID:", selectedGameId);
+    });
+
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
@@ -47,21 +81,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Only the host can start the game");
             return;
         }
-
-        socket.emit("startGame", 0);
+        console.log("Starting game")
+        console.log(selectedGameId)
+        socket.emit("startGame", selectedGameId);
+        console.log(currentGame)
     });
 
     socket.on("updateLobby", () => {
         refreshLobby();
     });
 
-    console.log("here");
-
-    const logoutLink = document.getElementById("logout");
+    const logoutLink = document.getElementById("logout")
     logoutLink?.addEventListener("click", async (event) => {
         event.preventDefault();
-        console.log("logout clicked");
-        await logout();
+        await logout()
+
     });
 
     document.addEventListener("click", function (event) {
@@ -174,14 +208,13 @@ function refreshLobby() {
 }
 
 async function populateUserWelcome() {
-    let currentUser = JSON.parse(localStorage.getItem("user"));
-    console.log(currentUser);
-    let header = document.getElementById("welcome");
-    header.innerText = `Welcome, ${currentUser.username}`;
+
+    let currentUser = JSON.parse(localStorage.getItem("user"))
+    let header = document.getElementById("welcome")
+    header.innerText = `Welcome, ${currentUser.username}`
 }
 
 function populateFriendsDropdown(friends, userMap) {
-    console.log(friends);
 
     let dropdown = document.getElementById("friendsList");
     let friendsList = document.getElementById("friend-list"); // Target the friends list section
@@ -192,15 +225,10 @@ function populateFriendsDropdown(friends, userMap) {
     if (friends.length === 0) {
         dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No friends found</span></li>`;
         friendsList.innerHTML = `<li class="list-group-item text-muted">No friends found</li>`;
-        return;
-    }
-
-    friends.forEach((friend) => {
-        let user = getUserForRequest(userMap, friend);
-        console.log(user);
-
-        // Populate dropdown
+      
+        let user = getUserForRequest(userMap, friend)
         let friendDropdownItem = `
+
             <li>
                 <div class="dropdown-item">
                     <strong>${user.username}</strong><br>
@@ -232,10 +260,8 @@ async function fetchUsers() {
 }
 
 async function addFriend(userId) {
-    console.log("Adding friend with id: " + userId);
-    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {
-        receiverId: userId,
-    });
+    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
+ 
     refreshDropdowns();
 }
 
@@ -382,17 +408,13 @@ function getUserForRequest(usermap, friend) {
     } else {
         userId = receive;
     }
-
-    console.log("Resolved User ID:", userId);
-    return usermap.get(userId);
+    return usermap.get(userId)
 }
 
 async function acceptRequest(userId) {
     try {
-        console.log(userId);
-        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", {
-            senderID: userId,
-        });
+        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { senderID: userId });
+
         alert("Friend request accepted!");
         refreshDropdowns(); // Refresh the dropdowns to update the status
     } catch (error) {
@@ -412,6 +434,7 @@ async function rejectRequest(userId) {
     }
 }
 
+
 const toggleButton = document.getElementById("friend-panel-toggle");
 const friendPanel = document.getElementById("friend-panel");
 
@@ -423,3 +446,18 @@ toggleButton.addEventListener("click", () => {
 document.getElementById("close-friend-panel").addEventListener("click", () => {
     document.getElementById("friend-panel").style.display = "none";
 });
+
+async function addAdminButton() {
+    const user = localStorage.getItem("user");
+    console.log(user)
+
+    let userIsAdmin = JSON.parse(user).roles.find(role => role == adminRolesEnum.ADMIN)
+
+    if (userIsAdmin) {
+        const adminNavItem = document.createElement("li");
+        adminNavItem.classList.add("nav-item");
+        adminNavItem.innerHTML = `<a class="nav-link text-warning" href="admin.html">Admin Console</a>`;
+        document.getElementById("adminConsoleLink").replaceWith(adminNavItem);
+    }
+}
+

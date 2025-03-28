@@ -12,6 +12,7 @@ export class SocketSession {
     userID: number | null;
     lobbyId: string | null;
     gameId: string | null;
+    private gameLoopInterval: NodeJS.Timeout | null = null;
     constructor(socket: Socket) {
         this.socket = socket;
         this.db = new LocalLobbyDatabase();
@@ -78,6 +79,13 @@ export class SocketSession {
         await this.updateLobbyMembers(prevLobbyId)
     }
 
+    async emitGameType(game: number) {
+        if (!this.lobbyId) {
+            throw new Error("no lobby exists");
+        }
+        io.to(this.lobbyId).emit("setGame", game);
+    }
+
     async createGame(gameType: number) {
         if (!this.userID) {
             throw new Error("User not authenticated in createGame");
@@ -101,6 +109,46 @@ export class SocketSession {
             players.map((p) => p.id.toString())
         ).gameId;
         await this.updateGame();
+
+        if (gameEnum === GamesEnum.PONG) {
+            this.startGameLoop();
+        }
+    }
+
+    private startGameLoop() {
+        if (!this.gameId || !this.lobbyId) return;
+
+        console.log("Starting game loop for Pong...");
+
+        // Run every 50ms (~20 updates per second)
+        this.gameLoopInterval = setInterval(async () => {
+            try {
+                const game = gameManager.getGameState(this.gameId!);
+                if (!game) {
+                    console.error("Game state not found.");
+                    this.stopGameLoop();
+                    return;
+                }
+                game.update()
+                io.to(this.lobbyId!).emit("updateGame", game);
+
+                if (game.isGameOver()) {
+                    console.log("Game over detected, stopping loop.");
+                    this.stopGameLoop();
+                    await this.gameOver(game.getWinner());
+                }
+            } catch (error) {
+                console.error("Error in game loop:", error);
+            }
+        }, 25);
+    }
+
+    private stopGameLoop() {
+        if (this.gameLoopInterval) {
+            clearInterval(this.gameLoopInterval);
+            this.gameLoopInterval = null;
+            console.log("Game loop stopped.");
+        }
     }
 
     async makeMove(index: number) {
@@ -124,10 +172,11 @@ export class SocketSession {
     }
 
     async gameOver(winner: string | null) {
+        this.stopGameLoop();
         if (!this.lobbyId) {
             throw new Error("user not part of a lobby in gameOver");
         }
-
+        console.log("Game over with winner: " + winner)
         io.to(this.lobbyId).emit("gameOver", winner);
         this.unsetGameID();
     }

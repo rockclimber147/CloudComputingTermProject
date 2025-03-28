@@ -5,23 +5,23 @@ import { context, sequelize } from './DbStartup.js';
 async function setupDatabase(): Promise<void> {
     try {
         // Sync the database (ensure tables exist without dropping them)
-        await sequelize.sync({ force: false });
+        await sequelize.sync({ alter: true });
 
         // Check if users already exist
         const userCount: number = await context.User.count();
         if (userCount > 0) {
             console.log("Users already exist. Skipping seeding.");
-            return;
-        }
-
-        // Insert dummy users
+        } else {
+                    // Insert dummy users
         await context.User.bulkCreate([
             { username: "alice", email: "alice@example.com", password: "hashedpassword1" },
             { username: "bob", email: "bob@example.com", password: "hashedpassword2" },
             { username: "charlie", email: "charlie@example.com", password: "hashedpassword3" }
         ]);
-
         console.log("Dummy users added successfully!");
+        }
+
+
     } catch (error) {
         // Type assertion for error since TypeScript does not infer errors automatically
         if (error instanceof Error) {

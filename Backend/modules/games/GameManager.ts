@@ -1,8 +1,10 @@
 import { TicTacToeGame } from "./TicTacToe/TicTacToeGame.js";
 import { Game, IGameState } from "./Game.js";
+import { PONGGame } from "./PONG/PONGGame.js";
 
 export enum GamesEnum {
-    TIC_TAC_TOE
+    TIC_TAC_TOE,
+    PONG
 }
 
 type GameConstructor = new (gameId: string, players: string[]) => Game<any>;
@@ -12,6 +14,7 @@ export class GameManager {
   private games: Map<string, Game<any>> = new Map();
   static readonly GAME_REGISTRY: Record<GamesEnum, GameConstructor> = {
       [GamesEnum.TIC_TAC_TOE]: TicTacToeGame,
+      [GamesEnum.PONG]: PONGGame
   };
 
   createGame(gameType: GamesEnum, gameId: string, players: string[]) {
