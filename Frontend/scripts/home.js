@@ -220,21 +220,30 @@ function populateFriendsDropdown(friends, userMap) {
 
     friends.forEach((friend) => {
         let user = getUserForRequest(userMap, friend);
-        let friendListItem = `
-            <li class="list-group-item">
-                <strong>${user.username}</strong><br>
-                <small class="text-muted">${user.email}</small>
-                <button class="btn btn-sm btn-primary invite-button" data-user-id="${user.id}">Invite</button>
-            </li>
-        `;
-        friendsList.innerHTML += friendListItem;
-    });
 
-    friendsList.addEventListener("click", (event) => {
-        if (event.target.classList.contains("invite-button")) {
-            const userId = event.target.dataset.userId;
-            inviteFriend(userId);
-        }
+        let friendListItem = document.createElement("li");
+        friendListItem.classList.add(
+            "list-group-item",
+            "d-flex",
+            "flex-column",
+            "align-items-start"
+        );
+
+        let userInfoDiv = createUserInfoDiv(user.username, user.email);
+
+        let buttonDiv = document.createElement("div");
+        buttonDiv.classList.add("d-flex", "justify-content-end", "mt-2");
+
+        let inviteButton = createButton("Invite", ["btn-primary"], () =>
+            inviteFriend(user.id)
+        );
+
+        buttonDiv.appendChild(inviteButton);
+
+        friendListItem.appendChild(userInfoDiv);
+        friendListItem.appendChild(buttonDiv);
+
+        friendsList.appendChild(friendListItem);
     });
 }
 
