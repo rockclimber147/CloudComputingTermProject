@@ -95,7 +95,6 @@ export class PONG {
         const scaleY = ui.canvas.height / this.GAME_HEIGHT;
     
         ui.ctx.font = `${Math.floor(20 * scaleY)}px Arial`;
-        ui.ctx.fillStyle = "black";
         ui.ctx.textAlign = "center";
     
         // Display scores in the middle of the canvas
@@ -113,8 +112,9 @@ export class PONG {
                 this.PADDLE_HEIGHT * scaleY
             );
     
-            // Draw scores
-            const scoreY = index === 0 ? scoreY1 : scoreY2;
+            // Draw scores with swapped colors
+            ui.ctx.fillStyle = colors[1 - index]; // Swapped score colors
+            const scoreY = index === 0 ? scoreY2 : scoreY1; // Switched score positions
             ui.ctx.fillText(player.score, centerX, scoreY);
         });
     
@@ -202,8 +202,8 @@ export class PONGHandler {
         this.yPlayer = otherPlayer.id
 
         const isHost = currentUser.id === this.xPlayer;
-        this.ui.topPlayer.textContent = `${hostPlayer.username}`;
-        this.ui.bottomPlayer.textContent = `${otherPlayer.username}`;
+        this.ui.topPlayer.textContent = `${otherPlayer.username}`; // Switched
+        this.ui.bottomPlayer.textContent = `${hostPlayer.username}`; // Switched
     }
 
     getPlayerInfo() {
