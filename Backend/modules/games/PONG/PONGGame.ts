@@ -104,7 +104,7 @@ export class PONGGame extends Game<number> {
                 this.reflectBallY();
                 this.ballPosition.y = PONGGame.PADDLE_OFFSET + 1;
             } else {
-                bottomPlayer.score += 1;
+                bottomPlayer.score += 1; // Reverted scoring logic
                 this.resetBall();
             }
         }
@@ -117,7 +117,7 @@ export class PONGGame extends Game<number> {
                 this.reflectBallY();
                 this.ballPosition.y = PONGGame.GAME_WIDTH - PONGGame.PADDLE_OFFSET - 1;
             } else {
-                topPlayer.score += 1;
+                topPlayer.score += 1; // Reverted scoring logic
                 this.resetBall();
             }
         }

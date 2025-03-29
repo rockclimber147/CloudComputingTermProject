@@ -121,9 +121,9 @@ export class PONG {
                 this.PADDLE_HEIGHT * scaleY
             );
 
-            // Draw scores with swapped colors
-            ui.ctx.fillStyle = colors[1 - index]; // Swapped score colors
-            const scoreY = index === 0 ? scoreY2 : scoreY1; // Switched score positions
+            // Draw scores with original colors and positions
+            ui.ctx.fillStyle = colors[index]; // Reverted score colors
+            const scoreY = index === 0 ? scoreY1 : scoreY2; // Reverted score positions
             ui.ctx.fillText(player.score, centerX, scoreY);
         });
 
@@ -218,8 +218,8 @@ export class PONGHandler {
         this.yPlayer = otherPlayer.id;
 
         const isHost = currentUser.id === this.xPlayer;
-        this.ui.topPlayer.textContent = `${otherPlayer.username}`; // Switched
-        this.ui.bottomPlayer.textContent = `${hostPlayer.username}`; // Switched
+        this.ui.topPlayer.textContent = `${hostPlayer.username}`; // Reverted
+        this.ui.bottomPlayer.textContent = `${otherPlayer.username}`; // Reverted
     }
 
     getPlayerInfo() {
