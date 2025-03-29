@@ -12,7 +12,9 @@ export class RedisService {
     }
 
   constructor(redisUrl: string) {
-    this._redisClient = new Redis(redisUrl);
+    this._redisClient = new Redis(redisUrl, {
+      tls: {}
+    });
 
     this.redisClient.on('error', (err) => {
       console.error('Redis Client Error:', err);
