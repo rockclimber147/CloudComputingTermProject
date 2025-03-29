@@ -1,6 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
 import { DbContext } from '../config/DbStartup.js'; 
-import { UserBasicInfo } from '../models/User.js';
+import { UserBasicInfo, UserWithRoles } from '../models/User.js';
 import { UserFriendStatusEnum } from '../models/UserFriend.js';
 import { ErrorWithStatusCode } from '../modules/ErrorHandling.js';
 import bcrypt from 'bcryptjs'
@@ -37,6 +37,7 @@ class UserRepository {
         if (!userName || !password) {
             throw new ErrorWithStatusCode(`Login requires username and password!`, 500)
         }
+
         let user = await this.context.User.findOne({
             where: {
                 username: userName
@@ -53,9 +54,12 @@ class UserRepository {
             throw new ErrorWithStatusCode(`Incorrect password`, 500);
         }
 
-        const userBasicInfo = new UserBasicInfo(user);
+        const roles = await this.context.UserRole.findAll({where: {
+            userId: user.id
+        }})
+        const userInfoWithRoles = new UserWithRoles(user, roles.map(role => role.roleId))
 
-        return userBasicInfo;
+        return userInfoWithRoles;
 
     }
 
@@ -65,7 +69,12 @@ class UserRepository {
             throw new ErrorWithStatusCode(`User with id ${userID} not found!`, 404);
         }
         
-        return new UserBasicInfo(user);
+        const roles = await this.context.UserRole.findAll({where: {
+            userId: user.id
+        }})
+        const userInfoWithRoles = new UserWithRoles(user, roles.map(role => role.roleId))
+
+        return userInfoWithRoles;
     }
 
     async logoutUser(userID: number) {

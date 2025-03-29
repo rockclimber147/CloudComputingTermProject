@@ -1,7 +1,10 @@
 import { refreshLogin } from "./refreshLogin.js";
 import socket, { joinLobby } from "./socket.js";
-import { logout, fetchAuth } from "./auth.js";
+import { logout, fetchAuth, adminRolesEnum } from "./auth.js";
+import { acceptRequest, rejectRequest } from "./friendRequest.js";
 import url from "./url.js";
+import { TicTacToeHandler } from "./TicTacToeRefactored.js";
+import { PONGHandler } from "./PONG.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const isLoggedIn = await refreshLogin();
@@ -9,8 +12,37 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html";
     }
 
+    let currentGame;
+
+    socket.on("setGame", (game) => {
+        console.log("in setGame");
+        console.log(game);
+
+        if (currentGame) {
+            currentGame.destroy();
+            currentGame = null; // Clear reference
+        }
+
+        if (game == 0) {
+            console.log("Tic tac toe init");
+            currentGame = new TicTacToeHandler();
+        } else if (game == 1) {
+            console.log("PONG init");
+            currentGame = new PONGHandler("PONG-Canvas");
+        }
+        currentGame.startGame();
+    });
+
     refreshLobby();
-    populateUserWelcome()
+    populateUserWelcome();
+    addAdminButton();
+
+    let selectedGameId = 0; // Default to Tic Tac Toe
+
+    document.getElementById("game-selection").addEventListener("change", (event) => {
+        selectedGameId = parseInt(event.target.value, 10);
+        console.log("Selected game ID:", selectedGameId);
+    });
 
     const joinLobbyButton = document.getElementById("join-lobby-btn");
     const startGameButton = document.getElementById("start-game-btn");
@@ -22,8 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Please enter a lobby id");
             return;
         }
-
-
 
         joinLobby(lobbyId);
     });
@@ -44,71 +74,75 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const currentUser = JSON.parse(localStorage.getItem("user"));
-        
+
         if (!(currentUser.id === host.id)) {
             alert("Only the host can start the game");
             return;
         }
-
-        socket.emit("startGame", 0);
+        console.log("Starting game");
+        console.log(selectedGameId);
+        socket.emit("startGame", selectedGameId);
+        console.log(currentGame);
     });
 
     socket.on("updateLobby", () => {
         refreshLobby();
     });
 
-    console.log("here")
-
-    const logoutLink = document.getElementById("logout")
+    const logoutLink = document.getElementById("logout");
     logoutLink?.addEventListener("click", async (event) => {
         event.preventDefault();
-        console.log("logout clicked")
-        await logout()
+        await logout();
     });
 
-    document.addEventListener("click", function(event) {
-        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+    document.addEventListener("click", function (event) {
+        if (
+            !searchInput.contains(event.target) &&
+            !searchResults.contains(event.target)
+        ) {
             searchResults.style.display = "none"; // Hide the results
         }
     });
 
-    await refreshDropdowns()
+    await refreshDropdowns();
 });
 
-async function refreshDropdowns() {
-    let loggedInId = JSON.parse(localStorage.getItem("user")).id
+export async function refreshDropdowns() {
+    let loggedInId = JSON.parse(localStorage.getItem("user")).id;
     const [allUsers, allFriendRequests] = await Promise.all([
         fetchUsers(),
-        fetchAuth(`${url}/api/users/friends`, "GET")
+        fetchAuth(`${url}/api/users/friends`, "GET"),
     ]);
 
-    const dbUsers = allUsers.filter(u => u.id != loggedInId)
+    const dbUsers = allUsers.filter((u) => u.id != loggedInId);
     const userMap = new Map();
-    dbUsers.forEach(user => {
-        userMap.set(user.id, user);  // Use user ID as the key
+    dbUsers.forEach((user) => {
+        userMap.set(user.id, user); // Use user ID as the key
     });
-    const receivedRequests = allFriendRequests.filter(f => f.receiverID == loggedInId)
-    document.getElementById("friendsDropdown")
-    .addEventListener("click", populateFriendsDropdown(
-        allFriendRequests.filter(u => u.status == "Accepted"),
+
+    const receivedRequests = allFriendRequests.filter(
+        (f) => f.receiverID == loggedInId
+    );
+
+    // Populate friends list directly
+    populateFriendsDropdown(
+        allFriendRequests.filter((u) => u.status == "Accepted"),
         userMap
-    ));
+    );
 
-    document.getElementById("requestsDropdown")
-    .addEventListener("click", () => populateRequestsDropdown(
-        receivedRequests.filter(u => u.status == "Pending"),
+    // Populate friend requests directly
+    populateRequestsDropdown(
+        receivedRequests.filter((u) => u.status == "Pending"),
         userMap
-    ));
+    );
 
-
-    document.getElementById("searchInput")
-    .addEventListener("input", (event) => {
+    document.getElementById("searchInput").addEventListener("input", (event) => {
         searchUsers(event.target.value, userMap, allFriendRequests);
     });
 
     const query = document.getElementById("searchInput").value.trim();
     if (query) {
-        searchUsers(query, userMap, allFriendRequests);  // Reapply search with updated data
+        searchUsers(query, userMap, allFriendRequests); // Reapply search with updated data
     }
 }
 
@@ -123,12 +157,13 @@ function getLobbyUsers() {
 
 function refreshLobbyUsers() {
     const users = getLobbyUsers();
-    
+
     const userList = document.getElementById("lobby-users");
-    userList.innerHTML = ""; 
+    userList.innerHTML = "";
 
     if (users.length === 0) {
-        userList.innerHTML = '<p class="text-muted text-center">Waiting for players...</p>';
+        userList.innerHTML =
+            '<p class="text-muted text-center">Waiting for players...</p>';
         return;
     }
 
@@ -147,7 +182,7 @@ function refreshLobbyID() {
     }
 
     const lobbyId = JSON.parse(lobby).id;
-    
+
     document.getElementById("lobby-id-text").textContent = lobbyId;
 }
 
@@ -159,10 +194,9 @@ function getHost() {
     const lobbyJson = JSON.parse(lobby);
 
     const users = lobbyJson.users;
-    
+
     return users.filter((user) => user.id == lobbyJson.host)[0];
 }
-
 
 function refreshLobby() {
     refreshLobbyUsers();
@@ -170,35 +204,46 @@ function refreshLobby() {
 }
 
 async function populateUserWelcome() {
-    let currentUser = JSON.parse(localStorage.getItem("user"))
-    console.log(currentUser)
-    let header = document.getElementById("welcome")
-    header.innerText = `Welcome, ${currentUser.username}`
+    let currentUser = JSON.parse(localStorage.getItem("user"));
+    let header = document.getElementById("welcome");
+    header.innerText = `Welcome, ${currentUser.username}`;
 }
 
 function populateFriendsDropdown(friends, userMap) {
-    console.log(friends)
-    let dropdown = document.getElementById("friendsList");
-    dropdown.innerHTML = ""; // Clear existing content
+    let friendsList = document.getElementById("friend-list");
+    friendsList.innerHTML = ""; // Clear existing content
 
     if (friends.length === 0) {
-        dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No friends found</span></li>`;
+        friendsList.innerHTML = `<li class="list-group-item text-muted">No friends found</li>`;
         return;
     }
 
-    friends.forEach(friend => {
-        let user = getUserForRequest(userMap, friend)
-        console.log(user)
-        let friendCard = `
-            <li>
-                <div class="dropdown-item">
-                    <strong>${user.username}</strong><br>
-                    <small class="text-muted">${user.email}</small>
-                </div>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-        `;
-        dropdown.innerHTML += friendCard;
+    friends.forEach((friend) => {
+        let user = getUserForRequest(userMap, friend);
+
+        let friendListItem = document.createElement("li");
+        friendListItem.classList.add(
+            "list-group-item",
+            "d-flex",
+            "flex-column",
+            "align-items-start"
+        );
+
+        let userInfoDiv = createUserInfoDiv(user.username, user.email);
+
+        let buttonDiv = document.createElement("div");
+        buttonDiv.classList.add("d-flex", "justify-content-end", "mt-2");
+
+        let inviteButton = createButton("Invite", ["btn-primary"], () =>
+            inviteFriend(user.id)
+        );
+
+        buttonDiv.appendChild(inviteButton);
+
+        friendListItem.appendChild(userInfoDiv);
+        friendListItem.appendChild(buttonDiv);
+
+        friendsList.appendChild(friendListItem);
     });
 }
 
@@ -212,8 +257,9 @@ async function fetchUsers() {
 }
 
 async function addFriend(userId) {
-    console.log("Adding friend with id: " + userId)
-    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {receiverId: userId})
+    await fetchAuth(`${url}/api/users/send-friend-request`, "POST", {
+        receiverId: userId,
+    });
     refreshDropdowns();
 }
 
@@ -221,11 +267,11 @@ async function addFriend(userId) {
 function createUserInfoDiv(username, email) {
     let userInfoDiv = document.createElement("div");
     userInfoDiv.classList.add("d-flex", "flex-column", "text-truncate");
-    
+
     let usernameStrong = document.createElement("strong");
     usernameStrong.textContent = username;
     userInfoDiv.appendChild(usernameStrong);
-    
+
     let userEmailSmall = document.createElement("small");
     userEmailSmall.classList.add("text-muted");
     userEmailSmall.textContent = email;
@@ -253,21 +299,30 @@ function searchUsers(query, usermap, userFriends) {
 
     if (!query.trim()) return; // Don't show results if empty
 
-    let filteredUsers = [...usermap.values()].filter(user => user.username.toLowerCase().includes(query.toLowerCase()));
+    let filteredUsers = [...usermap.values()].filter((user) =>
+        user.username.toLowerCase().includes(query.toLowerCase())
+    );
 
     if (filteredUsers.length === 0) {
         resultsContainer.innerHTML = `<li class="list-group-item text-muted">No users found</li>`;
         return;
     }
 
-    filteredUsers.forEach(user => {
+    filteredUsers.forEach((user) => {
         let userItem = document.createElement("li");
-        userItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+        userItem.classList.add(
+            "list-group-item",
+            "d-flex",
+            "justify-content-between",
+            "align-items-center"
+        );
 
         let userInfoDiv = createUserInfoDiv(user.username, user.email);
 
         // Determine button text and enable state
-        let existingFriend = userFriends.find(f => f.senderID == user.id || f.receiverID == user.id);
+        let existingFriend = userFriends.find(
+            (f) => f.senderID == user.id || f.receiverID == user.id
+        );
         let buttonText = "Add Friend";
         let enabled = true;
         if (existingFriend) {
@@ -279,7 +334,12 @@ function searchUsers(query, usermap, userFriends) {
             }
         }
 
-        let addButton = createButton(buttonText, ["btn-primary", "flex-shrink-0"], () => addFriend(user.id), !enabled);
+        let addButton = createButton(
+            buttonText,
+            ["btn-primary", "flex-shrink-0"],
+            () => addFriend(user.id),
+            !enabled
+        );
 
         userItem.appendChild(userInfoDiv);
         userItem.appendChild(addButton);
@@ -289,71 +349,91 @@ function searchUsers(query, usermap, userFriends) {
 
 // Refactored populateRequestsDropdown function
 function populateRequestsDropdown(requests, userMap) {
-    let dropdown = document.getElementById("requestsList");
-    dropdown.innerHTML = ""; // Clear existing content
+    let requestsList = document.getElementById("friend-requests");
+    requestsList.innerHTML = ""; // Clear existing content
 
     if (requests.length === 0) {
-        dropdown.innerHTML = `<li><span class="dropdown-item-text text-muted">No pending requests</span></li>`;
+        requestsList.innerHTML = `<li class="list-group-item text-muted">No pending friend requests</li>`;
         return;
     }
 
-    requests.forEach(request => {
-        let user = getUserForRequest(userMap, request)
+    requests.forEach((request) => {
+        let user = getUserForRequest(userMap, request);
 
-        let requestCard = document.createElement("li");
-        requestCard.classList.add("dropdown-item");
+        let requestListItem = document.createElement("li");
+        requestListItem.classList.add(
+            "list-group-item",
+            "d-flex",
+            "flex-column",
+            "align-items-start"
+        );
+
         let userInfoDiv = createUserInfoDiv(user.username, user.email);
 
-        let acceptButton = createButton("Accept", ["btn-success", "mr-2"], () => acceptRequest(request.senderID));
-        let declineButton = createButton("Reject", ["btn-danger"], () => rejectRequest(request.senderID));
-
         let buttonDiv = document.createElement("div");
-        buttonDiv.classList.add("d-flex", "justify-content-end");
+        buttonDiv.classList.add("d-flex", "justify-content-end", "mt-2", "gap-2");
+
+        let acceptButton = createButton("Accept", ["btn-success"], () =>
+            acceptRequest(request.senderID)
+        );
+        let declineButton = createButton("Reject", ["btn-danger"], () =>
+            rejectRequest(request.senderID)
+        );
+
         buttonDiv.appendChild(acceptButton);
         buttonDiv.appendChild(declineButton);
 
-        requestCard.appendChild(userInfoDiv);
-        requestCard.appendChild(buttonDiv);
+        requestListItem.appendChild(userInfoDiv);
+        requestListItem.appendChild(buttonDiv);
 
-        dropdown.appendChild(requestCard);
+        requestsList.appendChild(requestListItem);
     });
 }
 
 function getUserForRequest(usermap, friend) {
     let loggedInId = JSON.parse(localStorage.getItem("user")).id;
-    let send = friend.senderID; 
-    let receive = friend.receiverID; 
+    let send = friend.senderID;
+    let receive = friend.receiverID;
     let userId;
 
-    
     if (send !== loggedInId) {
-        userId = send; 
+        userId = send;
     } else {
         userId = receive;
     }
-    
-    console.log('Resolved User ID:', userId);
-    return usermap.get(userId)
+
+    return usermap.get(userId);
 }
 
-async function acceptRequest(userId) {
-    try {
-        console.log(userId)
-        await fetchAuth(`${url}/api/users/accept-friend-request`, "POST", { senderID: userId });
-        alert("Friend request accepted!");
-        refreshDropdowns(); // Refresh the dropdowns to update the status
-    } catch (error) {
-        console.error("Error accepting friend request:", error);
+async function addAdminButton() {
+    const user = localStorage.getItem("user");
+    console.log(user);
+
+    let userIsAdmin = JSON.parse(user).roles.find(
+        (role) => role == adminRolesEnum.ADMIN
+    );
+
+    if (userIsAdmin) {
+        const adminNavItem = document.createElement("li");
+        adminNavItem.classList.add("nav-item");
+        adminNavItem.innerHTML = `<a class="nav-link text-warning" href="admin.html">Admin Console</a>`;
+        document.getElementById("adminConsoleLink").replaceWith(adminNavItem);
     }
 }
 
+const toggleButton = document.getElementById("friend-panel-toggle");
+const friendPanel = document.getElementById("friend-panel");
 
-async function rejectRequest(userId) {
-    try {
-        await fetchAuth(`${url}/api/users/reject-friend-request`, "POST", { senderID: userId });
-        alert("Friend request declined!");
-        refreshDropdowns(); // Refresh the dropdowns to update the status
-    } catch (error) {
-        console.error("Error declining friend request:", error);
-    }
+toggleButton.addEventListener("click", () => {
+    const isVisible = friendPanel.style.display === "block";
+    friendPanel.style.display = isVisible ? "none" : "block";
+});
+
+document.getElementById("close-friend-panel").addEventListener("click", () => {
+    document.getElementById("friend-panel").style.display = "none";
+});
+
+function inviteFriend(id) {
+    console.log(id);
+    socket.emit("inviteLobby", id);
 }

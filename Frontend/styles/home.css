@@ -10,11 +10,21 @@
     font-weight: 500; 
 }
 
-html, body{
-    height: 120vh;
+html, body {
+    height:100%;
+    margin: 0;
 }
+
 #home-front{
     position: relative;
+    padding-bottom: 100px;
+}
+
+#home-front {
+    position: relative;
+    min-height: calc(100vh - 100px); 
+    display: flex;
+    flex-direction: column;
 }
 
 .lead{
@@ -65,7 +75,6 @@ html, body{
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
     padding: 20px;
     background: linear-gradient(135deg, #f0f0f0, #ffffff);
@@ -73,12 +82,7 @@ html, body{
     transition: box-shadow 0.3s ease;
     width: 90vw; /* Adjust width based on the viewport */
     max-width: 500px; /* Prevent it from becoming too wide */
-    margin: auto;
-    position: absolute;
-    top: 73%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    
+    margin: 20px auto; /* Centers horizontally and adds spacing from the top */
 }
 
 /* Player Info */
@@ -115,31 +119,28 @@ html, body{
 }
 
 /* Lobby */
-.card {
-    border-radius: 10px;
-    padding: 20px;
+
+#joinLobbyForm .form-control {
+    height: auto; /* Adjust input height if needed */
+}
+
+#lobbyForm{
+    height: 343px;
+    
 }
 
 
-#enter-lobby-form {
+#lobby-id-input{
     margin-top: 20px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    
 }
 
-#lobby-id-input {
-    margin-top: 10px;
+#lobbyButton{
+    padding-top: 20px;
 }
 
 .form-label {
     font-weight: bold;
-}
-
-
-#join-lobby-btn {
-    width: 50%;
-    margin-top: 10px;
 }
 
 
@@ -155,9 +156,21 @@ html, body{
     z-index: 1;
 }
 
-#lobby-info{
-    margin-top: 30px;
+
+
+.mb-4 {
+    margin-bottom: 2rem;
 }
+
+#game-front {
+    z-index: 10;
+}
+
+#home-front {
+    z-index: 1;
+}
+
+
 
 /* Make the search container responsive */
 .search-container {
@@ -201,13 +214,9 @@ html, body{
         align-items: flex-end; /* Push everything inside to the right */
     }
 
-    #searchInput {
-        width: 70%; /* Ensure input takes full width of container */
-        
-    }
+  
 
     #searchResults {
-        width: 70%; /* Matches input width */
         margin-top: 5px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         z-index: 1000;
@@ -216,3 +225,162 @@ html, body{
 }
 
 
+/* Friend Panel */
+#friend-panel-toggle {
+    background: linear-gradient(135deg, #343a40, #000000); /* black/charcoal gradient */
+    color: white;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    position: fixed;
+    bottom: 20px; 
+    right: 20px; 
+    z-index: 1050;
+    width: 60px;
+    height: 60px;
+}
+
+#friend-panel-toggle:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #212529, #000000);
+}
+
+#friend-panel {
+    border-radius: 15px;
+    padding: 0;
+    z-index: 1;
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 320px; /* Slightly wider for better spacing */
+    max-height: 500px; /* Limit height for better usability */
+    overflow-y: auto;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff); /* Subtle gradient for a modern look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+    display: none;
+}
+
+#friend-panel .card-header {
+    border-radius: 15px 15px 0 0; /* Rounded top corners */
+    padding: 0.75rem 1rem;
+    background: #343a40; /* Darker background for contrast */
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#friend-panel .card-body {
+    padding: 1rem;
+    background: #ffffff; /* Clean white background for content */
+}
+
+#friend-panel .list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+    white-space: normal; /* Allow text to wrap */
+    word-wrap: break-word; /* Break long words if necessary */
+    overflow: visible; /* Ensure text is fully visible */
+    flex-direction: column; /* Stack content vertically */
+    align-items: flex-start; /* Align content to the start */
+}
+
+#friend-panel .list-group-item:hover {
+    background-color: #f1f3f5; /* Subtle hover effect */
+}
+
+#friend-panel .list-group-item:last-child {
+    border-bottom: none;
+}
+
+#friend-panel .btn-sm {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+#friend-panel .btn-success {
+    background-color: #28a745;
+    border: none;
+    margin-right: 10px; /* Add spacing between buttons */
+}
+
+#friend-panel .btn-success:hover {
+    background-color: #218838;
+}
+
+#friend-panel .btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+
+#friend-panel .btn-danger:hover {
+    background-color: #c82333;
+}
+
+#friend-panel .btn-primary {
+    background-color: #28a745; /* Match the green color of the accept button */
+    border: none;
+    margin-right: 10px; /* Add spacing if needed */
+}
+
+#friend-panel .btn-primary:hover {
+    background-color: #218838; /* Match the hover effect of the accept button */
+}
+
+#friend-panel .list-group-item strong {
+    display: block; /* Ensure the name is on its own line */
+    max-width: 100%; /* Constrain the width */
+    word-wrap: break-word; /* Break long words if necessary */
+    margin-bottom: 1px; /* Further reduce spacing between name and email */
+}
+
+#friend-panel .list-group-item small {
+    display: block; /* Ensure the email is on its own line */
+    max-width: 100%; /* Constrain the width */
+    word-wrap: break-word; /* Break long words if necessary */
+    color: #6c757d; /* Muted text color for email */
+    margin-top: 0; /* Ensure no extra spacing above the email */
+}
+
+.card-body{
+    height: 500px;
+}
+
+/*Footer*/
+footer {
+    font-family: Arial, sans-serif;
+    margin-top: auto;
+    position: relative;
+}
+
+footer a {
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Game Image */
+.game-image {
+    width: 100%; /* Make the image responsive */
+    max-width: 375px; /* Increase the maximum width */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
+.game-image2 {
+    width: 100%; /* Make the image responsive */
+    max-width: 475px; /* Increase the maximum width */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto; /* Center the image */
+}

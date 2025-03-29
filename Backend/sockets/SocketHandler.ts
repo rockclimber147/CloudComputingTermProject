@@ -3,7 +3,7 @@ import { io } from "../config/SocketServer.js";
 import { SocketSession } from "./SocketSession.js";
 import { verifyToken } from "../modules/JwtUtils.js";
 
-const socketConnections: { [key: string]: SocketSession } = {};
+export const socketConnections: { [key: string]: SocketSession } = {};
 
 io.on("connection", async (socket: Socket) => {
     console.log("A user connected:", socket.id);
@@ -46,7 +46,7 @@ io.on("connection", async (socket: Socket) => {
         }
     });
 
-    socket.on("login", async (token: string) => {
+    socket.on("login", async (token: string, callback) => {
         console.log("Login with token", token);
 
         try {
@@ -57,6 +57,7 @@ io.on("connection", async (socket: Socket) => {
             socket.emit("error", error.message);
             return;
         }
+        callback("yep");
     });
 
     socket.on("setGameId", async (gameId: string) => {
@@ -73,8 +74,10 @@ io.on("connection", async (socket: Socket) => {
 
     socket.on("startGame", async (gameType: number) => {
         console.log("Game start request", gameType);
+
         try {
             // Create a game
+            await socketConnections[socket.id].emitGameType(gameType);
             await socketConnections[socket.id].createGame(gameType);
             console.log("Game created");
         } catch (error: any) {
@@ -95,10 +98,16 @@ io.on("connection", async (socket: Socket) => {
         }
     });
 
+    socket.on("inviteLobby", (userID: string) => {
+        console.log("inviteLobby", userID);
+        socketConnections[socket.id].sendInvite(parseInt(userID));
+    });
+
     // Handle disconnection
     socket.on("disconnect", async () => {
         try {
             console.log(`User ${socket.id} disconnected`);
+            await socketConnections[socket.id].gameOver(null);
             await socketConnections[socket.id].leaveLobby();
             delete socketConnections[socket.id];
         } catch (error: any) {
