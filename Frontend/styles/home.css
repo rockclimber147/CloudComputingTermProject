@@ -368,3 +368,19 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
+
+/* Game Image */
+.game-image {
+    width: 100%; /* Make the image responsive */
+    max-width: 375px; /* Increase the maximum width */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
+.game-image2 {
+    width: 100%; /* Make the image responsive */
+    max-width: 475px; /* Increase the maximum width */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
