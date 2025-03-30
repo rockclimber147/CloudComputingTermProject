@@ -121,20 +121,21 @@ class TicTacToeGame {
 
 export class TicTacToeHandler {
     constructor() {
+        console.log("Constructing Tic Tac Toe")
         this.game = new TicTacToeGame();
         this.currentTurnId = null;
         this.xPlayer = null;
         this.oPlayer = null;
-        this.cellClickHandler = this.handleCellClick.bind(this);
-        this.setupSocketEvents();
         this.gameIdSet = false;
         this.ui = new TicTacToeUI();
+        this.ongoingGame = false
+        console.log(this)
     }
 
-    setupUI() {
+    setupUIEvents() {
         const cells = this.ui.gameCells;
         cells.forEach((cell) => {
-            cell.addEventListener("click", this.cellClickHandler);
+            cell.addEventListener("click", this.handleCellClick.bind(this));
         });
     }
 
@@ -144,9 +145,15 @@ export class TicTacToeHandler {
         socket.emit("gameMakeMove", index);
     }
 
+    destroyUIEvents() {
+        const cells = this.ui.gameCells;
+        cells.forEach((cell) => {
+            cell.removeEventListener("click", this.handleCellClick);
+        });
+    }
+
     setupSocketEvents() {
         socket.on("updateGame", (payload) => {
-            console.log("IN updateGAme from Tetris Handler");
             if (!this.game.ongoingGame) {
                 this.startGame();
             }
@@ -166,19 +173,18 @@ export class TicTacToeHandler {
     startGame() {
         this.ui.initialize();
         this.ui.inject("game-front");
-        this.setupUI();
+        this.setupUIEvents();
+        this.setupSocketEvents();
+        this.assignPlayers();
         this.game.ongoingGame = true;
         document.getElementById("game-front").style.display = "block";
         document.getElementById("home-front").style.display = "none";
-        this.assignPlayers();
     }
 
     assignPlayers() {
         const lobby = JSON.parse(localStorage.getItem("lobby"));
         const currentUser = JSON.parse(localStorage.getItem("user"));
         if (!lobby || !currentUser || lobby.users.length !== 2) return;
-        console.log("lobby in assignPlayers");
-        console.log(lobby);
         const hostId = lobby.host;
         const players = lobby.users;
 
@@ -203,18 +209,13 @@ export class TicTacToeHandler {
         socket.emit("unsetGameId");
         document.getElementById("game-front").style.display = "none";
         document.getElementById("home-front").style.display = "block";
-        this.tearDown();
-    }
-
-    tearDown() {
-        console.log("Tearing down TicTacToeHandler...");
-        this.ui.destroy();
-        this.tearDownSocketEvents();
+        this.destroy();
     }
 
     destroy() {
         console.log("Destroying TicTacToeHandler...");
-        this.tearDown();
+        this.destroyUIEvents()
+        this.ui.destroy();
         this.tearDownSocketEvents();
     }
 
