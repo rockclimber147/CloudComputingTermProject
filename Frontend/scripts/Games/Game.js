@@ -5,7 +5,7 @@ export class HomeElementEnums {
 
 
 
-export class Game {
+export class GameHandler {
     showGame() {
         document.getElementById(HomeElementEnums.GAME_DIV).style.display = "block";
         document.getElementById(HomeElementEnums.LOBBY_DIV).style.display = "none";

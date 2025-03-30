@@ -1,6 +1,6 @@
-import socket from "./socket.js";
-import { SocketEmitEnums, SocketListenEnums } from "./socket.js";
-import { Game, HomeElementEnums } from "./Game.js";
+import socket from "../socket.js";
+import { SocketEmitEnums, SocketListenEnums } from "../socket.js";
+import { GameHandler, HomeElementEnums } from "./Game.js";
 
 
 class PONGGameUI {
@@ -148,7 +148,7 @@ export class PONG {
     }
 }
 
-export class PONGHandler extends Game {
+export class PONGHandler extends GameHandler {
     constructor(canvasID) {
         super();
         this.pongGame = new PONG(canvasID);

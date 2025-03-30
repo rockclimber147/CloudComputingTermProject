@@ -1,6 +1,6 @@
-import socket from "./socket.js";
-import { SocketEmitEnums, SocketListenEnums } from "./socket.js";
-import { Game, HomeElementEnums } from "./Game.js";
+import socket from "../socket.js";
+import { SocketEmitEnums, SocketListenEnums } from "../socket.js";
+import { GameHandler, HomeElementEnums } from "./Game.js";
 
 class TicTacToeUI {
     constructor() {
@@ -121,7 +121,7 @@ class TicTacToeGame {
     }
 }
 
-export class TicTacToeHandler extends Game {
+export class TicTacToeHandler extends GameHandler {
     constructor() {
         super();
         this.game = new TicTacToeGame();
