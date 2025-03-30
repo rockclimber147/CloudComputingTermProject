@@ -1,4 +1,5 @@
 import socket from "./socket.js";
+import { Game, HomeElementEnums } from "./Game.js";
 
 class TicTacToeUI {
     constructor() {
@@ -119,9 +120,9 @@ class TicTacToeGame {
     }
 }
 
-export class TicTacToeHandler {
+export class TicTacToeHandler extends Game {
     constructor() {
-        console.log("Constructing Tic Tac Toe")
+        super();
         this.game = new TicTacToeGame();
         this.currentTurnId = null;
         this.xPlayer = null;
@@ -172,13 +173,12 @@ export class TicTacToeHandler {
 
     startGame() {
         this.ui.initialize();
-        this.ui.inject("game-front");
+        this.ui.inject(HomeElementEnums.GAME_DIV);
         this.setupUIEvents();
         this.setupSocketEvents();
         this.assignPlayers();
         this.game.ongoingGame = true;
-        document.getElementById("game-front").style.display = "block";
-        document.getElementById("home-front").style.display = "none";
+        this.showGame()
     }
 
     assignPlayers() {
@@ -207,8 +207,7 @@ export class TicTacToeHandler {
         alert(`${winnerUsername} won the game!`);
         this.game.ongoingGame = false;
         socket.emit("unsetGameId");
-        document.getElementById("game-front").style.display = "none";
-        document.getElementById("home-front").style.display = "block";
+        this.hideGame()
         this.destroy();
     }
 

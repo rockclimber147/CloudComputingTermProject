@@ -1,4 +1,5 @@
 import socket from "./socket.js";
+import { Game, HomeElementEnums } from "./Game.js";
 
 class PONGGameUI {
     constructor() {
@@ -142,8 +143,9 @@ export class PONG {
     }
 }
 
-export class PONGHandler {
+export class PONGHandler extends Game {
     constructor(canvasID) {
+        super();
         this.pongGame = new PONG(canvasID);
         this.ongoingGame = false;
         this.ui = new PONGGameUI();
@@ -189,13 +191,12 @@ export class PONGHandler {
 
     startGame() {
         this.ui.initialize();
-        this.ui.inject("game-front");
+        this.ui.inject(HomeElementEnums.GAME_DIV);
         this.setupUIEvents();
         this.setupSocketEvents();
         this.assignPlayers();
         this.ongoingGame = true;
-        document.getElementById("game-front").style.display = "block";
-        document.getElementById("home-front").style.display = "none";
+        this.showGame()
     }
 
     makeMove(index) {
@@ -214,8 +215,7 @@ export class PONGHandler {
         socket.emit("unsetGameId");
         console.log("Reverting Frontend")
         this.destroy()
-        document.getElementById("game-front").style.display = "none";
-        document.getElementById("home-front").style.display = "block";
+        this.hideGame()
     }
 
     assignPlayers() {
