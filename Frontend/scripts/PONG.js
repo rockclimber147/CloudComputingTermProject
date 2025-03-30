@@ -202,6 +202,8 @@ export class PONGHandler {
         alert(`${winnerUsername} won the game`);
         this.ongoingGame = false;
         socket.emit("unsetGameId");
+        console.log("Reverting Frontend")
+        this.destroy()
         document.getElementById("game-front").style.display = "none";
         document.getElementById("home-front").style.display = "block";
     }
