@@ -49,5 +49,16 @@ export function joinLobby(lobbyId) {
     socket.emit("joinLobby", lobbyId);
 }
 
+export class SocketEmitEnums {
+    static GAME_MAKE_MOVE = "gameMakeMove"
+    static UNSET_GAME_ID = "unsetGameId"
+    static SET_GAME_ID = "setGameId"
+}
+
+export class SocketListenEnums {
+    static UPDATE_GAME = "updateGame"
+    static GAME_OVER = "gameOver"
+}
+
 export default socket;
 

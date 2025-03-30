@@ -1,4 +1,5 @@
 import socket from "./socket.js";
+import { SocketEmitEnums, SocketListenEnums } from "./socket.js";
 import { Game, HomeElementEnums } from "./Game.js";
 
 class TicTacToeUI {
@@ -143,7 +144,7 @@ export class TicTacToeHandler extends Game {
     handleCellClick(event) {
         const index = event.target.dataset.index;
         if (!this.game.ongoingGame) return;
-        socket.emit("gameMakeMove", index);
+        socket.emit(SocketEmitEnums.GAME_MAKE_MOVE, index);
     }
 
     destroyUIEvents() {
@@ -154,21 +155,21 @@ export class TicTacToeHandler extends Game {
     }
 
     setupSocketEvents() {
-        socket.on("updateGame", (payload) => {
+        socket.on(SocketListenEnums.UPDATE_GAME, (payload) => {
             if (!this.game.ongoingGame) {
                 this.startGame();
             }
             this.updateGame(payload);
         });
 
-        socket.on("gameOver", (winnerStr) => {
+        socket.on(SocketListenEnums.GAME_OVER, (winnerStr) => {
             this.endGame(winnerStr ? parseInt(winnerStr) : null);
         });
     }
 
     tearDownSocketEvents() {
-        socket.off("updateGame");
-        socket.off("gameOver");
+        socket.off(SocketListenEnums.UPDATE_GAME);
+        socket.off(SocketListenEnums.GAME_OVER);
     }
 
     startGame() {
@@ -206,7 +207,7 @@ export class TicTacToeHandler extends Game {
             players.find((user) => user.id === winnerID)?.username || "Nobody";
         alert(`${winnerUsername} won the game!`);
         this.game.ongoingGame = false;
-        socket.emit("unsetGameId");
+        socket.emit(SocketEmitEnums.UNSET_GAME_ID);
         this.hideGame()
         this.destroy();
     }
@@ -221,7 +222,7 @@ export class TicTacToeHandler extends Game {
     updateGame(payload) {
         if (!this.gameIdSet) {
             console.log("setting game id");
-            socket.emit("setGameId", payload.gameId);
+            socket.emit(SocketEmitEnums.SET_GAME_ID, payload.gameId);
         }
         this.drawBoard(payload.board);
         this.currentTurnId = parseInt(payload.currentTurn);

@@ -1,5 +1,7 @@
 import socket from "./socket.js";
+import { SocketEmitEnums, SocketListenEnums } from "./socket.js";
 import { Game, HomeElementEnums } from "./Game.js";
+
 
 class PONGGameUI {
     constructor() {
@@ -67,9 +69,12 @@ class PONGGameUI {
     }
 
     destroy() {
-        window.removeEventListener("keydown", this.keydownHandler);
+        window.removeEventListener("resize", this.setCanvasSize);
         if (this.container) {
             this.container.remove();
+            this.container = null; // Ensures the reference is cleared
+            this.canvas = null;
+            this.ctx = null;
         }
     }
 }
@@ -161,13 +166,13 @@ export class PONGHandler extends Game {
 
     setupSocketEvents() {
         console.log("Initializing PONG sockets")
-        socket.on("updateGame", (payload) => {
+        socket.on(SocketListenEnums.UPDATE_GAME, (payload) => {
             if (this.ongoingGame == false) {
                 this.startGame();
             }
             if (!this.gameIdSet) {
                 console.log("setting game id");
-                socket.emit("setGameId", payload.gameId);
+                socket.emit(SocketEmitEnums.SET_GAME_ID, payload.gameId);
                 this.gameIdSet = true;
             }
 
@@ -175,14 +180,14 @@ export class PONGHandler extends Game {
             this.pongGame.draw(this.ui);
         });
 
-        socket.on("gameOver", (winner) => {
+        socket.on(SocketListenEnums.GAME_OVER, (winner) => {
             this.endGame(winner);
         });
     }
 
     tearDownSocketEvents() {
-        socket.off("updateGame");
-        socket.off("gameOver");
+        socket.off(SocketListenEnums.UPDATE_GAME);
+        socket.off(SocketListenEnums.GAME_OVER);
     }
 
     setupUIEvents() {
@@ -201,7 +206,7 @@ export class PONGHandler extends Game {
 
     makeMove(index) {
         if (!this.ongoingGame) return;
-        socket.emit("gameMakeMove", index);
+        socket.emit(SocketEmitEnums.GAME_MAKE_MOVE, index);
     }
 
     endGame(winnerID) {
@@ -212,7 +217,7 @@ export class PONGHandler extends Game {
             "nobody";
         alert(`${winnerUsername} won the game`);
         this.ongoingGame = false;
-        socket.emit("unsetGameId");
+        socket.emit(SocketEmitEnums.UNSET_GAME_ID);
         console.log("Reverting Frontend")
         this.destroy()
         this.hideGame()
@@ -241,9 +246,8 @@ export class PONGHandler extends Game {
     }
 
     destroy() {
-        // Remove socket event listeners
+        console.log("Destroying PONG game")
         this.tearDownSocketEvents()
-        // Remove window keydown event listener
         this.ui.destroy();
 
         this.pongGame = null;
