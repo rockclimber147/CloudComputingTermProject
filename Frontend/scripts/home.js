@@ -3,8 +3,8 @@ import socket, { joinLobby } from "./socket.js";
 import { logout, fetchAuth, adminRolesEnum } from "./auth.js";
 import { acceptRequest, rejectRequest } from "./friendRequest.js";
 import url from "./url.js";
-import { TicTacToeHandler } from "./TicTacToeRefactored.js";
-import { PONGHandler } from "./PONG.js";
+import { TicTacToeHandler } from "./Games/TicTacToeRefactored.js";
+import { PONGHandler } from "./Games/PONG.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const isLoggedIn = await refreshLogin();

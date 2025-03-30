@@ -1,10 +1,21 @@
-import socket from "./socket.js";
+import socket from "../socket.js";
+import { SocketEmitEnums, SocketListenEnums } from "../socket.js";
+import { GameHandler, HomeElementEnums } from "./Game.js";
+
 
 class PONGGameUI {
     constructor() {
+        this.container = null;
+        this.header = null;
+        this.topPlayer = null;
+        this.canvas = null;
+        this.bottomPlayer = null;
+        this.ctx = null;
+    }
+
+    initialize() {
         this.container = document.createElement("div");
         this.container.id = "pong-game-container";
-        // Add Bootstrap class to center content
         this.container.classList.add(
             "d-flex",
             "flex-column",
@@ -15,41 +26,32 @@ class PONGGameUI {
 
         this.header = document.createElement("h1");
         this.header.textContent = "PONG";
-        this.header.classList.add("mb-4"); // Add margin-bottom for spacing
+        this.header.classList.add("mb-4");
 
-        this.topPlayer = this.header = document.createElement("h1");
+        this.topPlayer = document.createElement("h1"); // Fix assignment mistake
+        this.bottomPlayer = document.createElement("h1");
 
         this.canvas = document.createElement("canvas");
         this.canvas.id = "pong-canvas";
-        // Add Bootstrap classes for width and height
         this.canvas.classList.add("border");
 
-        // Function to resize the canvas based on the minimum of the width or height of the screen
+        // Function to resize the canvas
         const setCanvasSize = () => {
+            if (!this.canvas) return;
             const minSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
-            this.canvas.width = minSize; // Set width based on the minimum of screen width or height
-            this.canvas.height = minSize; // Set height to the same value for a square canvas
+            this.canvas.width = minSize;
+            this.canvas.height = minSize;
         };
 
-        // Set canvas size initially
         setCanvasSize();
-
-        this.bottomPlayer = this.header = document.createElement("h1");
-
-        // Recalculate the size when the window is resized
         window.addEventListener("resize", setCanvasSize);
 
-        // Append elements
         this.container.appendChild(this.header);
         this.container.appendChild(this.topPlayer);
         this.container.appendChild(this.canvas);
         this.container.appendChild(this.bottomPlayer);
 
-        this.ctx = null;
-    }
-
-    setEventHandlers(gameHandler) {
-        window.addEventListener("keydown", gameHandler.handleKeydown);
+        this.ctx = this.canvas.getContext("2d");
     }
 
     inject(targetSelector) {
@@ -67,9 +69,12 @@ class PONGGameUI {
     }
 
     destroy() {
-        window.removeEventListener("keydown", this.keydownHandler);
+        window.removeEventListener("resize", this.setCanvasSize);
         if (this.container) {
             this.container.remove();
+            this.container = null; // Ensures the reference is cleared
+            this.canvas = null;
+            this.ctx = null;
         }
     }
 }
@@ -84,6 +89,8 @@ export class PONG {
 
         this.gameState = null; // Will hold backend game state
         this.gameIdSet = false;
+        this.topPlayer = null;
+        this.bottomPlayer = null;
     }
 
     updateGameState(state) {
@@ -93,10 +100,10 @@ export class PONG {
     draw(ui) {
         if (!this.gameState) return;
 
-        const colors = ["Red", "Blue"];
-
         const { ballPosition, playerStateMap } = this.gameState;
-        const players = Object.values(playerStateMap);
+        playerStateMap[this.topPlayer].color = "red"
+        playerStateMap[this.bottomPlayer].color = "blue"
+        const players = Object.entries(playerStateMap);
         ui.ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
 
         const scaleX = ui.canvas.width / this.GAME_WIDTH;
@@ -110,10 +117,10 @@ export class PONG {
         const scoreY1 = ui.canvas.height / 4; // Score position for player 1
         const scoreY2 = (3 * ui.canvas.height) / 4; // Score position for player 2
 
-        players.forEach((player, index) => {
+        players.forEach(([key, player]) => {
             let paddleY =
-                index === 0 ? 5 : ui.canvas.height - this.PADDLE_HEIGHT * scaleY - 5;
-            ui.ctx.fillStyle = colors[index]; // Paddle color
+                key == this.topPlayer ? 5 : ui.canvas.height - this.PADDLE_HEIGHT * scaleY - 5;
+            ui.ctx.fillStyle = player.color; // Paddle color
             ui.ctx.fillRect(
                 (player.paddlePosition.x - this.PADDLE_WIDTH / 2) * scaleX,
                 paddleY,
@@ -122,8 +129,8 @@ export class PONG {
             );
 
             // Draw scores with original colors and positions
-            ui.ctx.fillStyle = colors[index]; // Reverted score colors
-            const scoreY = index === 0 ? scoreY1 : scoreY2; // Reverted score positions
+            ui.ctx.fillStyle = player.color; // Reverted score colors
+            const scoreY = key == this.topPlayer ? scoreY1 : scoreY2; // Reverted score positions
             ui.ctx.fillText(player.score, centerX, scoreY);
         });
 
@@ -141,12 +148,12 @@ export class PONG {
     }
 }
 
-export class PONGHandler {
+export class PONGHandler extends GameHandler {
     constructor(canvasID) {
+        super();
         this.pongGame = new PONG(canvasID);
         this.ongoingGame = false;
         this.ui = new PONGGameUI();
-        this.initializeSocketInteractions();
 
         this.handleKeydown = (event) => {
             if (event.key === "a" || event.key === "A") {
@@ -157,14 +164,15 @@ export class PONGHandler {
         };
     }
 
-    initializeSocketInteractions() {
-        socket.on("updateGame", (payload) => {
+    setupSocketEvents() {
+        console.log("Initializing PONG sockets")
+        socket.on(SocketListenEnums.UPDATE_GAME, (payload) => {
             if (this.ongoingGame == false) {
                 this.startGame();
             }
             if (!this.gameIdSet) {
                 console.log("setting game id");
-                socket.emit("setGameId", payload.gameId);
+                socket.emit(SocketEmitEnums.SET_GAME_ID, payload.gameId);
                 this.gameIdSet = true;
             }
 
@@ -172,35 +180,47 @@ export class PONGHandler {
             this.pongGame.draw(this.ui);
         });
 
-        socket.on("gameOver", (winner) => {
+        socket.on(SocketListenEnums.GAME_OVER, (winner) => {
             this.endGame(winner);
         });
     }
 
+    tearDownSocketEvents() {
+        socket.off(SocketListenEnums.UPDATE_GAME);
+        socket.off(SocketListenEnums.GAME_OVER);
+    }
+
+    setupUIEvents() {
+        window.addEventListener("keydown", this.handleKeydown);
+    }
+
     startGame() {
-        document.getElementById("game-front").style.display = "block";
-        document.getElementById("home-front").style.display = "none";
-        this.ui.setEventHandlers(this);
-        this.ui.inject("game-front");
+        this.ui.initialize();
+        this.ui.inject(HomeElementEnums.GAME_DIV);
+        this.setupUIEvents();
+        this.setupSocketEvents();
         this.assignPlayers();
         this.ongoingGame = true;
+        this.showGame()
     }
 
     makeMove(index) {
         if (!this.ongoingGame) return;
-        socket.emit("gameMakeMove", index);
+        socket.emit(SocketEmitEnums.GAME_MAKE_MOVE, index);
     }
 
     endGame(winnerID) {
+        this.ongoingGame = false;
         const players = this.getPlayerInfo();
         const winnerUsername =
             players.find((user) => Number(user.id) === Number(winnerID))?.username ||
             "nobody";
         alert(`${winnerUsername} won the game`);
         this.ongoingGame = false;
-        socket.emit("unsetGameId");
-        document.getElementById("game-front").style.display = "none";
-        document.getElementById("home-front").style.display = "block";
+        socket.emit(SocketEmitEnums.UNSET_GAME_ID);
+        console.log("Reverting Frontend")
+        this.destroy()
+        this.hideGame()
     }
 
     assignPlayers() {
@@ -213,13 +233,12 @@ export class PONGHandler {
         const players = lobby.users;
 
         const hostPlayer = players.find((user) => user.id === hostId);
-        this.xPlayer = hostPlayer.id;
+        this.pongGame.topPlayer = hostPlayer.id;
         const otherPlayer = players.find((user) => user.id !== hostId);
-        this.yPlayer = otherPlayer.id;
+        this.pongGame.bottomPlayer = otherPlayer.id;
 
-        const isHost = currentUser.id === this.xPlayer;
-        this.ui.topPlayer.textContent = `${hostPlayer.username}`; // Reverted
-        this.ui.bottomPlayer.textContent = `${otherPlayer.username}`; // Reverted
+        this.ui.topPlayer.textContent = `${hostPlayer.username}`;
+        this.ui.bottomPlayer.textContent = `${otherPlayer.username}`;
     }
 
     getPlayerInfo() {
@@ -227,11 +246,8 @@ export class PONGHandler {
     }
 
     destroy() {
-        // Remove socket event listeners
-        socket.off("updateGame");
-        socket.off("gameOver");
-
-        // Remove window keydown event listener
+        console.log("Destroying PONG game")
+        this.tearDownSocketEvents()
         this.ui.destroy();
 
         this.pongGame = null;

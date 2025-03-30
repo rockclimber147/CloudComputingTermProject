@@ -12,6 +12,20 @@ class Vector {
         this.x += vector.x;
         this.y += vector.y;
     }
+
+    getMagnitude(): number {
+        return Math.sqrt(this.x * this.x + this.y * this.y)
+    }
+
+    scaleBy(factor: number) {
+        this.x *= factor;
+        this.y *= factor;
+    }
+
+    scaleTo(factor: number) {
+        let length = this.getMagnitude()
+        this.scaleBy(factor / length)
+    }
 }
 
 class PlayerState {
@@ -27,26 +41,21 @@ export class PONGGame extends Game<number> {
     static readonly PADDLE_MOVE_SPEED = 1.7;
     static readonly SCORE_TO_WIN = 10;
     static readonly GAME_WIDTH = 100;
-    static readonly PADDLE_WIDTH = 15;
+    static readonly PADDLE_WIDTH = 17;
     static readonly PADDLE_OFFSET = 5;
-    static readonly BALL_MIN_VELOCITY = 0.75;
-    static readonly BALL_MAX_VELOCITY = 1.5;
+    static readonly BALL_MIN_VELOCITY = 1;
+    static readonly BALL_MAX_VELOCITY = 3;
 
-    ballPosition = new Vector(50, 50);
-    ballVelocity = new Vector(
-        this.getRandomBallVelocity(),
-        this.getRandomBallVelocity()
-    );
+    ballPosition: Vector = new Vector();
+    ballVelocity: Vector = new Vector();
     playerStateMap: { [key: string]: PlayerState } = {};
 
     constructor(gameId: string, players: string[]) {
         super(gameId, players);
-        console.log("in PONGGame constructor");
-        console.log(players);
         for (let i = 0; i < players.length; i++) {
             this.playerStateMap[players[i]] = new PlayerState(PONGGame.GAME_WIDTH * i);
         }
-        console.log(this.playerStateMap);
+        this.resetBall()
     }
 
     isGameOver(): boolean {
@@ -133,7 +142,10 @@ export class PONGGame extends Game<number> {
 
     reflectBallY() {
         this.ballVelocity.y *= -1;
-        this.ballVelocity.x = this.getRandomBallVelocity();
+        this.ballVelocity.scaleBy(1.1)
+        if (this.ballVelocity.getMagnitude() > PONGGame.BALL_MAX_VELOCITY) {
+            this.ballVelocity.scaleTo(PONGGame.BALL_MAX_VELOCITY)
+        }
     }
 
     resetBall() {
@@ -141,11 +153,12 @@ export class PONGGame extends Game<number> {
             PONGGame.GAME_WIDTH / 2,
             PONGGame.GAME_WIDTH / 2
         );
-
-        this.ballVelocity = new Vector(
-            this.getRandomBallVelocity(),
-            this.getRandomBallVelocity()
-        );
+    
+        const ballX = this.getRandomBallVelocity();
+        const ballY = Math.sign(this.getRandomBallVelocity()) * Math.abs(ballX) * 1.5;
+    
+        this.ballVelocity = new Vector(ballX, ballY);
+        this.ballVelocity.scaleTo(PONGGame.BALL_MIN_VELOCITY);
     }
 
     getRandomPositiveBallVelocity(): number {

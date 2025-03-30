@@ -1,4 +1,6 @@
-import socket from "./socket.js";
+import socket from "../socket.js";
+import { SocketEmitEnums, SocketListenEnums } from "../socket.js";
+import { GameHandler, HomeElementEnums } from "./Game.js";
 
 class TicTacToeUI {
     constructor() {
@@ -119,66 +121,71 @@ class TicTacToeGame {
     }
 }
 
-export class TicTacToeHandler {
+export class TicTacToeHandler extends GameHandler {
     constructor() {
+        super();
         this.game = new TicTacToeGame();
         this.currentTurnId = null;
         this.xPlayer = null;
         this.oPlayer = null;
-        this.cellClickHandler = this.handleCellClick.bind(this);
-        this.setupSocketEvents();
         this.gameIdSet = false;
         this.ui = new TicTacToeUI();
+        this.ongoingGame = false
+        console.log(this)
     }
 
-    setupUI() {
+    setupUIEvents() {
         const cells = this.ui.gameCells;
         cells.forEach((cell) => {
-            cell.addEventListener("click", this.cellClickHandler);
+            cell.addEventListener("click", this.handleCellClick.bind(this));
         });
     }
 
     handleCellClick(event) {
         const index = event.target.dataset.index;
         if (!this.game.ongoingGame) return;
-        socket.emit("gameMakeMove", index);
+        socket.emit(SocketEmitEnums.GAME_MAKE_MOVE, index);
+    }
+
+    destroyUIEvents() {
+        const cells = this.ui.gameCells;
+        cells.forEach((cell) => {
+            cell.removeEventListener("click", this.handleCellClick);
+        });
     }
 
     setupSocketEvents() {
-        socket.on("updateGame", (payload) => {
-            console.log("IN updateGAme from Tetris Handler");
+        socket.on(SocketListenEnums.UPDATE_GAME, (payload) => {
             if (!this.game.ongoingGame) {
                 this.startGame();
             }
             this.updateGame(payload);
         });
 
-        socket.on("gameOver", (winnerStr) => {
+        socket.on(SocketListenEnums.GAME_OVER, (winnerStr) => {
             this.endGame(winnerStr ? parseInt(winnerStr) : null);
         });
     }
 
     tearDownSocketEvents() {
-        socket.off("updateGame");
-        socket.off("gameOver");
+        socket.off(SocketListenEnums.UPDATE_GAME);
+        socket.off(SocketListenEnums.GAME_OVER);
     }
 
     startGame() {
         this.ui.initialize();
-        this.ui.inject("game-front");
-        this.setupUI();
-        this.game.ongoingGame = true;
-        document.getElementById("game-front").style.display = "block";
-        document.getElementById("home-front").style.display = "none";
+        this.ui.inject(HomeElementEnums.GAME_DIV);
+        this.setupUIEvents();
+        this.setupSocketEvents();
         this.assignPlayers();
+        this.game.ongoingGame = true;
+        this.showGame()
     }
 
     assignPlayers() {
         const lobby = JSON.parse(localStorage.getItem("lobby"));
         const currentUser = JSON.parse(localStorage.getItem("user"));
         if (!lobby || !currentUser || lobby.users.length !== 2) return;
-        console.log("lobby in assignPlayers");
-        console.log(lobby);
         const hostId = lobby.host;
         const players = lobby.users;
 
@@ -200,28 +207,22 @@ export class TicTacToeHandler {
             players.find((user) => user.id === winnerID)?.username || "Nobody";
         alert(`${winnerUsername} won the game!`);
         this.game.ongoingGame = false;
-        socket.emit("unsetGameId");
-        document.getElementById("game-front").style.display = "none";
-        document.getElementById("home-front").style.display = "block";
-        this.tearDown();
-    }
-
-    tearDown() {
-        console.log("Tearing down TicTacToeHandler...");
-        this.ui.destroy();
-        this.tearDownSocketEvents();
+        socket.emit(SocketEmitEnums.UNSET_GAME_ID);
+        this.hideGame()
+        this.destroy();
     }
 
     destroy() {
         console.log("Destroying TicTacToeHandler...");
-        this.tearDown();
+        this.destroyUIEvents()
+        this.ui.destroy();
         this.tearDownSocketEvents();
     }
 
     updateGame(payload) {
         if (!this.gameIdSet) {
             console.log("setting game id");
-            socket.emit("setGameId", payload.gameId);
+            socket.emit(SocketEmitEnums.SET_GAME_ID, payload.gameId);
         }
         this.drawBoard(payload.board);
         this.currentTurnId = parseInt(payload.currentTurn);
