@@ -84,6 +84,8 @@ export class PONG {
 
         this.gameState = null; // Will hold backend game state
         this.gameIdSet = false;
+        this.topPlayer = null;
+        this.bottomPlayer = null;
     }
 
     updateGameState(state) {
@@ -93,10 +95,10 @@ export class PONG {
     draw(ui) {
         if (!this.gameState) return;
 
-        const colors = ["Red", "Blue"];
-
         const { ballPosition, playerStateMap } = this.gameState;
-        const players = Object.values(playerStateMap);
+        playerStateMap[this.topPlayer].color = "red"
+        playerStateMap[this.bottomPlayer].color = "blue"
+        const players = Object.entries(playerStateMap);
         ui.ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
 
         const scaleX = ui.canvas.width / this.GAME_WIDTH;
@@ -110,10 +112,10 @@ export class PONG {
         const scoreY1 = ui.canvas.height / 4; // Score position for player 1
         const scoreY2 = (3 * ui.canvas.height) / 4; // Score position for player 2
 
-        players.forEach((player, index) => {
+        players.forEach(([key, player]) => {
             let paddleY =
-                index === 0 ? 5 : ui.canvas.height - this.PADDLE_HEIGHT * scaleY - 5;
-            ui.ctx.fillStyle = colors[index]; // Paddle color
+                key == this.topPlayer ? 5 : ui.canvas.height - this.PADDLE_HEIGHT * scaleY - 5;
+            ui.ctx.fillStyle = player.color; // Paddle color
             ui.ctx.fillRect(
                 (player.paddlePosition.x - this.PADDLE_WIDTH / 2) * scaleX,
                 paddleY,
@@ -122,8 +124,8 @@ export class PONG {
             );
 
             // Draw scores with original colors and positions
-            ui.ctx.fillStyle = colors[index]; // Reverted score colors
-            const scoreY = index === 0 ? scoreY1 : scoreY2; // Reverted score positions
+            ui.ctx.fillStyle = player.color; // Reverted score colors
+            const scoreY = key == this.topPlayer ? scoreY1 : scoreY2; // Reverted score positions
             ui.ctx.fillText(player.score, centerX, scoreY);
         });
 
@@ -158,6 +160,7 @@ export class PONGHandler {
     }
 
     initializeSocketInteractions() {
+        console.log("Initializing PONG sockets")
         socket.on("updateGame", (payload) => {
             if (this.ongoingGame == false) {
                 this.startGame();
@@ -213,13 +216,12 @@ export class PONGHandler {
         const players = lobby.users;
 
         const hostPlayer = players.find((user) => user.id === hostId);
-        this.xPlayer = hostPlayer.id;
+        this.pongGame.topPlayer = hostPlayer.id;
         const otherPlayer = players.find((user) => user.id !== hostId);
-        this.yPlayer = otherPlayer.id;
+        this.pongGame.bottomPlayer = otherPlayer.id;
 
-        const isHost = currentUser.id === this.xPlayer;
-        this.ui.topPlayer.textContent = `${hostPlayer.username}`; // Reverted
-        this.ui.bottomPlayer.textContent = `${otherPlayer.username}`; // Reverted
+        this.ui.topPlayer.textContent = `${hostPlayer.username}`;
+        this.ui.bottomPlayer.textContent = `${otherPlayer.username}`;
     }
 
     getPlayerInfo() {
